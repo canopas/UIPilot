@@ -7,7 +7,7 @@ The missing typesafe SwiftUI navigation library
 
 ## Why another SwiftUI navigation library?
 - UIPilot is not a replacement of the SwiftUI's `NavigationView`, it's rather a wrapper around it that you would have likely written. Thus all standard `NavigationView` features like title, swipe gesture, topbar etc. are available by default.
-- APIs are very simple inspired by the android, flutter and web based routers.
+- APIs are inspired by the android, flutter and web based routers - Very simple and easy to use.
 - Typesafe navigation - Routing to wrong path will fail at compile time rather than runtime.
 - Typesafe parameters - Routing with wrong parameters will fail at compile time rather than runtime.
 - Very tiny library - it's barely 100 lines of code.
