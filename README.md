@@ -46,7 +46,7 @@ struct HomeView: View {
     var body: some View {
         VStack {
             Button("Go to detail", action: {
-                pilot.push(AppRoute.Detail(id: 11))    // Pass arguments
+                pilot.push(.Detail(id: 11))    // Pass arguments
             })
         }.navigationTitle("Home")  // Set title using standard NavigationView APIs
     }
@@ -61,7 +61,7 @@ struct DetailView: View {
         VStack {
             Text("Passed id \(id)").padding()
             Button("Go to nested detail", action: {
-                pilot.push(AppRoute.NestedDetail)
+                pilot.push(.NestedDetail)
             })
             Button("Go back", action: {
                 pilot.pop() // Pop current route
