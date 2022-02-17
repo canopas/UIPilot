@@ -1,7 +1,6 @@
-import UIKit
 import SwiftUI
 
-class UIPilot<T: Hashable>: ObservableObject {
+public class UIPilot<T: Hashable>: ObservableObject {
     @Published var paths: [Path<T>] = []
 
     public init(_ initialRoute: T) {
@@ -118,7 +117,7 @@ class UIPilotHostVM<T: Hashable>: ObservableObject {
     }
 }
 
-struct UIPilotHost<T: Hashable> : View {
+public struct UIPilotHost<T: Hashable> : View {
 
     @ObservedObject private var pilot: UIPilot<T>
     @ObservedObject private var vm: UIPilotHostVM<T>
