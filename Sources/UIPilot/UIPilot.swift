@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 public class UIPilot<T: Hashable>: ObservableObject {
     @Published var paths: [Path<T>] = []
@@ -8,19 +9,15 @@ public class UIPilot<T: Hashable>: ObservableObject {
     }
     
     public func push(_ route: T) {
-        DispatchQueue.global().async {
-            self.paths.append(Path(route: route))
-        }
+        self.paths.append(Path(route: route))
     }
     
     public func pop() {
-        DispatchQueue.global().async {
-            if !self.paths.isEmpty {
-                self.paths.removeLast()
-            }
+        if !self.paths.isEmpty {
+            self.paths.removeLast()
         }
     }
-
+    
     public func popTo(_ route: T, inclusive: Bool = false) {
         if paths.isEmpty {
             return
@@ -50,8 +47,10 @@ struct Path<T: Hashable>: Hashable, Equatable {
 }
 
 struct PathView: View {
-    private let content: AnyView
+    
     @ObservedObject private var vm: PathViewVM
+
+    private let content: AnyView
 
     public init(_ content: AnyView, next: PathView? = nil, onPop: @escaping () -> Void = { }) {
         self.content = content
@@ -94,16 +93,22 @@ class UIPilotHostVM<T: Hashable>: ObservableObject {
     private let routeMap: (T) -> AnyView
     
     private var pathViews = [Path<T>: AnyView]()
-
+    private var cancellable: AnyCancellable? = nil
+    
+    @Published var content: PathView? = nil
+    
     init(pilot: UIPilot<T>, routeMap: @escaping (T) -> AnyView) {
         self.pilot = pilot
         self.routeMap = routeMap
+        cancellable = self.pilot.$paths.sink(receiveValue: { [weak self] path in
+            self?.content = self?.getView()
+        })
     }
-    
+        
     func getView() -> PathView {
         recycleViews()
         var current: PathView? = nil
-        for (_, path) in pilot.paths.reversed().enumerated() {
+        for path in pilot.paths.reversed() {
             var content = pathViews[path]
             
             if content == nil {
@@ -111,8 +116,9 @@ class UIPilotHostVM<T: Hashable>: ObservableObject {
                 content = pathViews[path]
             }
 
-            let routeView = PathView(content!, next: current == nil ? nil : current, onPop: {
-                if !self.pilot.paths.isEmpty, self.pilot.paths.last != path {
+            let routeView = PathView(content!, next: current == nil ? nil : current, onPop: { [weak self] in
+                if let self = self, !self.pilot.paths.isEmpty,
+                   self.pilot.paths.last != path {
                     self.pilot.pop()
                 }
             })
@@ -132,11 +138,10 @@ class UIPilotHostVM<T: Hashable>: ObservableObject {
 
 public struct UIPilotHost<T: Hashable> : View {
 
-    @ObservedObject private var pilot: UIPilot<T>
-    @ObservedObject private var vm: UIPilotHostVM<T>
+    private let pilot: UIPilot<T>
     
-    @State private var content: PathView? = nil
-        
+    @ObservedObject private var vm: UIPilotHostVM<T>
+
     public init(_ pilot: UIPilot<T>, _ routeMap: @escaping (T) -> AnyView) {
         self.pilot = pilot
         self.vm = UIPilotHostVM(pilot: pilot, routeMap: routeMap)
@@ -144,12 +149,8 @@ public struct UIPilotHost<T: Hashable> : View {
 
     public var body: some View {
         NavigationView {
-            content
+            vm.content
         }
         .environmentObject(pilot)
-        .onReceive(pilot.$paths) { paths in
-            self.content = vm.getView()
-        }
     }
 }
-
