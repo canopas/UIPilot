@@ -53,18 +53,22 @@ struct HomeView: View {
 }
 
 // Popping current route
-struct NestedDetail: View {
+struct DetailView: View {
     @EnvironmentObject var pilot: UIPilot<AppRoute>
+    let id: Int
     
     var body: some View {
         VStack {
-            Button("Go back", action: {
-                pilot.pop()   // Pop back
+            Text("Passed id \(id)").padding()
+            Button("Go to detail2", action: {
+                pilot.push(AppRoute.NestedDetail)
             })
-        }.navigationTitle("Nested detail")
+            Button("Go back", action: {
+                pilot.pop() // Pop current route
+            })
+        }.navigationTitle("Detail")
     }
 }
-
 
 // Popping multiple routes
 struct NestedDetail: View {
