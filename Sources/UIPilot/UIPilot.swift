@@ -7,17 +7,17 @@ public class UIPilot<T: Hashable>: ObservableObject {
         push(initialRoute)
     }
     
-    func push(_ route: T) {
+    public func push(_ route: T) {
         paths.append(Path(route: route))
     }
     
-    func pop() {
+    public func pop() {
         if !paths.isEmpty {
             paths.removeLast()
         }
     }
     
-    func popTo(_ route: T, inclusive: Bool = false) {
+    public func popTo(_ route: T, inclusive: Bool = false) {
         if paths.isEmpty {
             return
         }
@@ -129,7 +129,7 @@ public struct UIPilotHost<T: Hashable> : View {
         self.vm = UIPilotHostVM(pilot: pilot, routeMap: routeMap)
     }
 
-    var body: some View {
+    public var body: some View {
         NavigationView {
             content
         }
