@@ -97,6 +97,7 @@ class UIPilotHostVM<T: Hashable>: ObservableObject {
     }
     
     func getView() -> PathView {
+        recycleViews()
         var current: PathView? = nil
         for (_, path) in pilot.paths.reversed().enumerated() {
             var content = pathViews[path]
@@ -114,6 +115,14 @@ class UIPilotHostVM<T: Hashable>: ObservableObject {
             current = routeView
         }
         return current ?? PathView(AnyView(EmptyView()))
+    }
+    
+    private func recycleViews() {
+        for key in pathViews.keys {
+            if !pilot.paths.contains(key) {
+                pathViews.removeValue(forKey: key)
+            }
+        }
     }
 }
 
