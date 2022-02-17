@@ -60,7 +60,7 @@ struct DetailView: View {
     var body: some View {
         VStack {
             Text("Passed id \(id)").padding()
-            Button("Go to detail2", action: {
+            Button("Go to nested detail", action: {
                 pilot.push(AppRoute.NestedDetail)
             })
             Button("Go back", action: {
