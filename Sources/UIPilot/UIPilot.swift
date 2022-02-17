@@ -8,15 +8,19 @@ public class UIPilot<T: Hashable>: ObservableObject {
     }
     
     public func push(_ route: T) {
-        paths.append(Path(route: route))
-    }
-    
-    public func pop() {
-        if !paths.isEmpty {
-            paths.removeLast()
+        DispatchQueue.global().async {
+            self.paths.append(Path(route: route))
         }
     }
     
+    public func pop() {
+        DispatchQueue.global().async {
+            if !self.paths.isEmpty {
+                self.paths.removeLast()
+            }
+        }
+    }
+
     public func popTo(_ route: T, inclusive: Bool = false) {
         if paths.isEmpty {
             return
