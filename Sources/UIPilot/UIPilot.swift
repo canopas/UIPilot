@@ -1,7 +1,7 @@
 import SwiftUI
 import Combine
 
-public class UIPilot<T: Hashable>: ObservableObject {
+public class UIPilot<T: Equatable>: ObservableObject {
     @Published var paths: [Path<T>] = [] {
         didSet { state.onPathsChanged(paths: paths) }
     }
@@ -44,12 +44,16 @@ public class UIPilot<T: Hashable>: ObservableObject {
     }
 }
 
-struct Path<T: Hashable>: Hashable, Equatable {
+struct Path<T: Equatable>: Equatable, Hashable {
     let route: T
     let id: String = UUID().uuidString
     
     static func == (lhs: Path, rhs: Path) -> Bool {
         return lhs.route == rhs.route && lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 
@@ -99,7 +103,7 @@ class PathViewState: ObservableObject {
     }
 }
 
-class UIPilotViewState<T: Hashable>: ObservableObject {
+class UIPilotViewState<T: Equatable>: ObservableObject {
     
     private let routeMap: (T) -> AnyView
     private let onPop: () -> Void
@@ -152,7 +156,7 @@ class UIPilotViewState<T: Hashable>: ObservableObject {
     }
 }
 
-public struct UIPilotHost<T: Hashable> : View {
+public struct UIPilotHost<T: Equatable> : View {
 
     private let pilot: UIPilot<T>
     
