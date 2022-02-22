@@ -28,16 +28,16 @@ enum AppRoute: Hashable {
 
 // Add UIPilotHost and map views with routes. That's it, you're ready to go.
 struct ContentView: View {
-    @StateObject var pilot = UIPilot(AppRoute.Home)
-    
-    var body: some View {
-        UIPilotHost(pilot) { route in
-            switch route {
+    @StateObject var pilot = UIPilot(AppRoute.Home) { route in
+        switch route {
             case .Home: return AnyView(HomeView())
             case .Detail(let id): return AnyView(DetailView(id: id))
             case .NestedDetail: return AnyView(NestedDetail())
-            }
         }
+    }
+    
+    var body: some View {
+        UIPilotHost(pilot)
     }
 }
 
@@ -97,7 +97,7 @@ Once you have your Swift package set up, adding UIPilot as a dependency is as ea
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/canopas/UIPilot.git", .upToNextMajor(from: "1.0.4"))
+    .package(url: "https://github.com/canopas/UIPilot.git", .upToNextMajor(from: "1.1.0"))
 ]
 ```
 
