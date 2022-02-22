@@ -2,9 +2,16 @@ import SwiftUI
 import Combine
 
 public class UIPilot<T: Hashable>: ObservableObject {
-    @Published var paths: [Path<T>] = []
+    @Published var paths: [Path<T>] = [] {
+        didSet { state.onPathsChanged(paths: paths) }
+    }
 
-    public init(_ initialRoute: T) {
+    var state: UIPilotViewState<T>!
+    
+    public init(_ initialRoute: T, _ routeMap: @escaping (T) -> AnyView) {
+        state = UIPilotViewState(routeMap: routeMap, onPop: { [weak self] in
+            self?.pop()
+        })
         push(initialRoute)
     }
     
@@ -48,18 +55,18 @@ struct Path<T: Hashable>: Hashable, Equatable {
 
 struct PathView: View {
     
-    @ObservedObject private var vm: PathViewVM
-
     private let content: AnyView
 
-    public init(_ content: AnyView, next: PathView? = nil, onPop: @escaping () -> Void = { }) {
+    @ObservedObject var state: PathViewState
+
+    public init(_ content: AnyView, state: PathViewState) {
         self.content = content
-        self.vm = PathViewVM(next: next, onPop: onPop)
+        self.state = state
     }
 
     var body: some View {
         VStack {
-            NavigationLink(destination: self.vm.next, isActive: self.$vm.isActive) {
+            NavigationLink(destination: self.state.next, isActive: self.$state.isActive) {
                 EmptyView()
             }.isDetailLink(false)
             content
@@ -67,7 +74,7 @@ struct PathView: View {
     }
 }
 
-class PathViewVM: ObservableObject {
+class PathViewState: ObservableObject {
     @Published
     var isActive: Bool = false {
         didSet {
@@ -77,59 +84,68 @@ class PathViewVM: ObservableObject {
         }
     }
     
-    let next: PathView?
-    private let onPop: () -> Void
+    @Published
+    var next: PathView? = nil {
+        didSet {
+            isActive = next != nil
+        }
+    }
     
-    init(next: PathView?, onPop: @escaping () -> Void) {
+    var onPop: () -> Void
+    
+    init(next: PathView? = nil, onPop: @escaping () -> Void = {}) {
         self.next = next
-        self.isActive = next != nil
         self.onPop = onPop
     }
 }
 
-class UIPilotHostVM<T: Hashable>: ObservableObject {
+class UIPilotViewState<T: Hashable>: ObservableObject {
     
-    private let pilot: UIPilot<T>
     private let routeMap: (T) -> AnyView
+    private let onPop: () -> Void
     
-    private var pathViews = [Path<T>: AnyView]()
-    private var cancellable: AnyCancellable? = nil
+    private var pathViews = [Path<T>: PathView]()
     
     @Published var content: PathView? = nil
     
-    init(pilot: UIPilot<T>, routeMap: @escaping (T) -> AnyView) {
-        self.pilot = pilot
+    init(routeMap: @escaping (T) -> AnyView, onPop: @escaping () -> Void) {
         self.routeMap = routeMap
-        cancellable = self.pilot.$paths.sink(receiveValue: { [weak self] path in
-            self?.content = self?.getView()
-        })
+        self.onPop = onPop
+    }
+    
+    func onPathsChanged(paths: [Path<T>]) {
+        content = getView(paths)
     }
         
-    func getView() -> PathView {
-        recycleViews()
+    func getView(_ paths: [Path<T>]) -> PathView? {
+        recycleViews(paths)
+
         var current: PathView? = nil
-        for path in pilot.paths.reversed() {
+        for path in paths.reversed() {
             var content = pathViews[path]
             
             if content == nil {
-                pathViews[path] = routeMap(path.route)
+                pathViews[path] = PathView(routeMap(path.route), state: PathViewState())
                 content = pathViews[path]
             }
-
-            let routeView = PathView(content!, next: current == nil ? nil : current, onPop: { [weak self] in
-                if let self = self, !self.pilot.paths.isEmpty,
-                   self.pilot.paths.last != path {
-                    self.pilot.pop()
+            
+            content?.state.next = current
+            content?.state.onPop = current == nil ? {} : { [weak self] in
+                if let self = self, !paths.isEmpty,
+                    paths.last != path {
+                    self.onPop()
                 }
-            })
-            current = routeView
+            }
+
+            current = content
         }
-        return current ?? PathView(AnyView(EmptyView()))
+        
+        return current
     }
     
-    private func recycleViews() {
+    private func recycleViews(_ paths: [Path<T>]) {
         for key in pathViews.keys {
-            if !pilot.paths.contains(key) {
+            if !paths.contains(key) {
                 pathViews.removeValue(forKey: key)
             }
         }
@@ -140,16 +156,13 @@ public struct UIPilotHost<T: Hashable> : View {
 
     private let pilot: UIPilot<T>
     
-    @ObservedObject private var vm: UIPilotHostVM<T>
-
-    public init(_ pilot: UIPilot<T>, _ routeMap: @escaping (T) -> AnyView) {
+    public init(_ pilot: UIPilot<T>) {
         self.pilot = pilot
-        self.vm = UIPilotHostVM(pilot: pilot, routeMap: routeMap)
     }
 
     public var body: some View {
         NavigationView {
-            vm.content
+            pilot.state.content
         }
         .environmentObject(pilot)
     }
