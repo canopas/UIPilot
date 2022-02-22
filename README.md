@@ -19,7 +19,7 @@ The missing typesafe SwiftUI navigation library
 
 ```swift
 // Define routes of the app
-enum AppRoute: Hashable {
+enum AppRoute: Equatable {
     case Home
     case Detail(id: Int)  // Typesafe parameters
     case NestedDetail
@@ -97,7 +97,7 @@ Once you have your Swift package set up, adding UIPilot as a dependency is as ea
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/canopas/UIPilot.git", .upToNextMajor(from: "1.1.0"))
+    .package(url: "https://github.com/canopas/UIPilot.git", .upToNextMajor(from: "1.1.1"))
 ]
 ```
 
