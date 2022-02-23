@@ -28,7 +28,7 @@ enum AppRoute: Equatable {
 
 // Add UIPilotHost and map views with routes. That's it, you're ready to go.
 struct ContentView: View {
-    @StateObject var pilot = UIPilot(AppRoute.Home)
+    @StateObject var pilot = UIPilot(initial: AppRoute.Home)
     
     var body: some View {
         UIPilotHost(pilot)  { route in
