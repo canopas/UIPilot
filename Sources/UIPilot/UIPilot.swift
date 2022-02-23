@@ -2,17 +2,21 @@ import SwiftUI
 import Combine
 
 public class UIPilot<T: Equatable>: ObservableObject {
-    @Published var paths: [Path<T>] = [] {
-        didSet { state.onPathsChanged(paths: paths) }
+    var paths: [Path<T>] = [] {
+        didSet { updateViewState() }
     }
 
+    var routeMap: RouteMap<T>? {
+        didSet { updateViewState() }
+    }
+    
     var state: UIPilotViewState<T>!
     
-    public init(_ initialRoute: T, _ routeMap: @escaping (T) -> AnyView) {
-        state = UIPilotViewState(routeMap: routeMap, onPop: { [weak self] in
+    public init(initial: T) {
+        state = UIPilotViewState(onPop: { [weak self] in
             self?.pop()
         })
-        push(initialRoute)
+        push(initial)
     }
     
     public func push(_ route: T) {
@@ -40,6 +44,12 @@ public class UIPilot<T: Equatable>: ObservableObject {
         
         for _ in found..<paths.count {
             pop()
+        }
+    }
+    
+    private func updateViewState() {
+        if let routeMap = routeMap {
+            state.onPathsChanged(paths: paths, routeMap: routeMap)
         }
     }
 }
@@ -105,23 +115,21 @@ class PathViewState: ObservableObject {
 
 class UIPilotViewState<T: Equatable>: ObservableObject {
     
-    private let routeMap: (T) -> AnyView
     private let onPop: () -> Void
     
     private var pathViews = [Path<T>: PathView]()
-    
+        
     @Published var content: PathView? = nil
     
-    init(routeMap: @escaping (T) -> AnyView, onPop: @escaping () -> Void) {
-        self.routeMap = routeMap
+    init(onPop: @escaping () -> Void) {
         self.onPop = onPop
     }
     
-    func onPathsChanged(paths: [Path<T>]) {
-        content = getView(paths)
+    func onPathsChanged(paths: [Path<T>], routeMap: RouteMap<T>) {
+        content = getView(paths, routeMap)
     }
         
-    func getView(_ paths: [Path<T>]) -> PathView? {
+    func getView(_ paths: [Path<T>], _ routeMap: RouteMap<T>) -> PathView? {
         recycleViews(paths)
 
         var current: PathView? = nil
@@ -156,12 +164,15 @@ class UIPilotViewState<T: Equatable>: ObservableObject {
     }
 }
 
+public typealias RouteMap<T> = (T) -> AnyView
+
 public struct UIPilotHost<T: Equatable> : View {
 
     private let pilot: UIPilot<T>
     
-    public init(_ pilot: UIPilot<T>) {
+    public init(_ pilot: UIPilot<T>, _ routeMap: @escaping RouteMap<T>) {
         self.pilot = pilot
+        self.pilot.routeMap = routeMap
     }
 
     public var body: some View {
