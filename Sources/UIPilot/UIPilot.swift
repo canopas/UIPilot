@@ -166,18 +166,22 @@ class UIPilotViewState<T: Equatable>: ObservableObject {
 
 public typealias RouteMap<T> = (T) -> AnyView
 
-public struct UIPilotHost<T: Equatable> : View {
+public struct UIPilotHost<T: Equatable>: View {
 
     private let pilot: UIPilot<T>
-    
+
+    @ObservedObject
+    private var state: UIPilotViewState<T>
+
     public init(_ pilot: UIPilot<T>, _ routeMap: @escaping RouteMap<T>) {
         self.pilot = pilot
+        self.state = pilot.state
         self.pilot.routeMap = routeMap
     }
 
     public var body: some View {
         NavigationView {
-            pilot.state.content
+            state.content
         }
         .environmentObject(pilot)
     }
