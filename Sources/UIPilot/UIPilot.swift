@@ -183,6 +183,7 @@ public struct UIPilotHost<T: Equatable>: View {
         NavigationView {
             state.content
         }
+        .navigationViewStyle(.stack)
         .environmentObject(pilot)
     }
 }
