@@ -86,7 +86,7 @@ struct NestedDetail: View {
 ```
 
 ## Complex use cases
-The library is designed to meet complex use cases as well as simple ones. You can also have nested `UIPilot` as many as you like!
+The library is designed to meet simples use cases as well as complex ones. You can also have nested `UIPilot` as many as you like!
 
 For example,. It's very easy to acheive split screen like behavior.
 
