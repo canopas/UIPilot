@@ -104,7 +104,7 @@ Once you have your Swift package set up, adding UIPilot as a dependency is as ea
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/canopas/UIPilot.git", .upToNextMajor(from: "1.1.3"))
+    .package(url: "https://github.com/canopas/UIPilot.git", .upToNextMajor(from: "1.1.4"))
 ]
 ```
 
