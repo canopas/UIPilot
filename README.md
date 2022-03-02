@@ -14,7 +14,7 @@
 - Very tiny library - it's barely 100 lines of code.
 
 ## Documentation
-Visit [the website](https://canopas.github.io/UIPilot/) for more information.
+Visit [the website](https://canopas.github.io/UIPilot/) for documentation and examples.
 
 ## Complex use cases
 The library is designed to meet simples use cases as well as complex ones. You can also have nested `UIPilot` as many as you like!
