@@ -4,7 +4,7 @@
 [![Platforms](https://img.shields.io/badge/Platforms-macOS_iOS_tvOS_watchOS-yellowgreen?style=flat-square)](https://img.shields.io/badge/Platforms-macOS_iOS_tvOS_watchOS-Green?style=flat-square)
 [![Swift Package Manager](https://img.shields.io/badge/Swift_Package_Manager-compatible-orange?style=flat-square)](https://img.shields.io/badge/Swift_Package_Manager-compatible-orange?style=flat-square)
 
-<img src="media/intro-image.jpg?raw=true" height="350" />
+<img src="assets/intro-image.jpg?raw=true" height="350" />
 
 ## Why another SwiftUI navigation library?
 - UIPilot is not a replacement of the SwiftUI's `NavigationView`, it's rather a wrapper around it that you would have likely written. Thus all standard `NavigationView` features like title, swipe gesture, topbar etc. are available by default.
@@ -90,7 +90,7 @@ The library is designed to meet simples use cases as well as complex ones. You c
 
 For example,. It's very easy to acheive split screen like behavior.
 
-<img src="media/complex-routing.gif?raw=true" height="500" />
+<img src="assets/complex-routing.gif?raw=true" height="500" />
 
 Please have a look at the [article](https://blog.canopas.com/swiftui-complex-navigation-made-easier-with-uipilot-5b33279f3476) for more information of the implementation.
 
