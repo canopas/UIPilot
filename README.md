@@ -39,6 +39,34 @@ dependencies: [
 ]
 ```
 
+### CocoaPods
+
+[CocoaPods][] is a dependency manager for Cocoa projects. To install
+UIPilot with CocoaPods:
+
+ 1. Make sure CocoaPods is [installed][CocoaPods Installation].
+
+    ```sh
+    # Using the default Ruby install will require you to use sudo when
+    # installing and updating gems.
+    [sudo] gem install cocoapods
+    ```
+
+ 2. Update your Podfile to include the following:
+
+    ```ruby
+    use_frameworks!
+
+    target 'YourAppTargetName' do
+        pod 'UIPilot', '~> 1.1.4'
+    end
+    ```
+
+ 3. Run `pod install --repo-update`.
+
+[CocoaPods]: https://cocoapods.org
+[CocoaPods Installation]: https://guides.cocoapods.org/using/getting-started.html#getting-started
+
 # Bugs and Feedback
 For bugs, questions and discussions please use the [Github Issues](https://github.com/canopas/JetTapTarget/issues).
 
