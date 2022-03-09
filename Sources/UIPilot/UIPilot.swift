@@ -82,7 +82,10 @@ struct PathView: View {
         VStack {
             NavigationLink(destination: self.state.next, isActive: self.$state.isActive) {
                 EmptyView()
-            }.isDetailLink(false)
+            }
+#if os(iOS)
+            .isDetailLink(false)
+#endif
             content
         }
     }
@@ -118,7 +121,7 @@ class UIPilotViewState<T: Equatable>: ObservableObject {
     private let onPop: () -> Void
     
     private var pathViews = [Path<T>: PathView]()
-        
+
     @Published var content: PathView? = nil
     
     init(onPop: @escaping () -> Void) {
@@ -128,7 +131,7 @@ class UIPilotViewState<T: Equatable>: ObservableObject {
     func onPathsChanged(paths: [Path<T>], routeMap: RouteMap<T>) {
         content = getView(paths, routeMap)
     }
-        
+
     func getView(_ paths: [Path<T>], _ routeMap: RouteMap<T>) -> PathView? {
         recycleViews(paths)
 
@@ -144,7 +147,7 @@ class UIPilotViewState<T: Equatable>: ObservableObject {
             content?.state.next = current
             content?.state.onPop = current == nil ? {} : { [weak self] in
                 if let self = self, !paths.isEmpty,
-                    paths.last != path {
+                   paths.last != path {
                     self.onPop()
                 }
             }
@@ -183,7 +186,9 @@ public struct UIPilotHost<T: Equatable>: View {
         NavigationView {
             state.content
         }
+#if !os(macOS)
         .navigationViewStyle(.stack)
+#endif
         .environmentObject(pilot)
     }
 }
