@@ -8,16 +8,16 @@ Pod::Spec.new do |s|
                        DESC
 
   s.homepage         = "https://github.com/canopas/UIPilot"
-  s.license          = { :type => 'MIT', :file => 'LICENSE.md' }
+  s.license          = { :type => "MIT", :file => "LICENSE.md" }
   s.author           = { "Jimmy" => "jimmy@canopas.com" }
-  s.source           = { :git => "https://github.com/canopas/UIPilot", :tag => "#{s.version}" }
-  s.source_files     = "Sources/UIPilot/**/*"
+  s.source           = { :git => "https://github.com/canopas/UIPilot.git", :tag => s.version.to_s }
+  s.source_files     = "Sources/UIPilot/*.swift"
   s.social_media_url = 'https://twitter.com/canopassoftware'
 
   s.module_name      = 'UIPilot'
-  s.default_subspec  = 'standard'
   s.requires_arc     = true
-  s.swift_versions   = '5.5'
+  s.swift_version    = '5.5'
+  s.preserve_paths   = 'README.md'
 
   s.ios.deployment_target     = '14.0'
   s.tvos.deployment_target    = '14.0'
