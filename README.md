@@ -35,7 +35,7 @@ Once you have your Swift package set up, adding UIPilot as a dependency is as ea
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/canopas/UIPilot.git", .upToNextMajor(from: "1.1.4"))
+    .package(url: "https://github.com/canopas/UIPilot.git", .upToNextMajor(from: "1.1.5"))
 ]
 ```
 
@@ -44,7 +44,7 @@ dependencies: [
 [CocoaPods][]  is a dependency manager for Cocoa projects. For usage and installation instructions, visit their website. To integrate UIPilot into your Xcode project using CocoaPods, specify it in your Podfile:
 
     target 'YourAppTargetName' do
-        pod 'UIPilot', '~> 1.1.4'
+        pod 'UIPilot', '~> 1.1.5'
     end
 
 [CocoaPods]: https://cocoapods.org
