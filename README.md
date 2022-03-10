@@ -41,7 +41,7 @@ dependencies: [
 
 ### CocoaPods
 
-[CocoaPods][]  is a dependency manager for Cocoa projects. For usage and installation instructions, visit their website. To integrate UIPilot into your Xcode project using CocoaPods, specify it in your Podfile:
+[CocoaPods][] is a dependency manager for Cocoa projects. For usage and installation instructions, visit their website. To integrate UIPilot into your Xcode project using CocoaPods, specify it in your Podfile:
 
     target 'YourAppTargetName' do
         pod 'UIPilot', '~> 1.1.5'
