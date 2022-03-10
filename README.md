@@ -17,9 +17,9 @@
 Visit [the website](https://canopas.github.io/UIPilot/) for documentation and examples.
 
 ## Complex use cases
-The library is designed to meet simples use cases as well as complex ones. You can also have nested `UIPilot` as many as you like!
+The library is designed to meet simple use cases as well as complex ones. You can also have nested `UIPilot` as many as you like!
 
-For example,. It's very easy to acheive split screen like behavior.
+For example, it's very easy to achieve split screen like behavior.
 
 <img src="https://github.com/canopas/UIPilot/blob/main/docs/assets/complex-routing.gif?raw=true" height="500" />
 
@@ -35,40 +35,22 @@ Once you have your Swift package set up, adding UIPilot as a dependency is as ea
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/canopas/UIPilot.git", .upToNextMajor(from: "1.1.4"))
+    .package(url: "https://github.com/canopas/UIPilot.git", .upToNextMajor(from: "1.1.5"))
 ]
 ```
 
 ### CocoaPods
 
-[CocoaPods][] is a dependency manager for Cocoa projects. To install
-UIPilot with CocoaPods:
-
- 1. Make sure CocoaPods is [installed][CocoaPods Installation].
-
-    ```sh
-    # Using the default Ruby install will require you to use sudo when
-    # installing and updating gems.
-    [sudo] gem install cocoapods
-    ```
-
- 2. Update your Podfile to include the following:
-
-    ```ruby
-    use_frameworks!
+[CocoaPods][] is a dependency manager for Cocoa projects. For usage and installation instructions, visit their website. To integrate UIPilot into your Xcode project using CocoaPods, specify it in your Podfile:
 
     target 'YourAppTargetName' do
-        pod 'UIPilot', '~> 1.1.4'
+        pod 'UIPilot', '~> 1.1.5'
     end
-    ```
-
- 3. Run `pod install --repo-update`.
 
 [CocoaPods]: https://cocoapods.org
-[CocoaPods Installation]: https://guides.cocoapods.org/using/getting-started.html#getting-started
 
 # Bugs and Feedback
-For bugs, questions and discussions please use the [Github Issues](https://github.com/canopas/JetTapTarget/issues).
+For bugs, questions and discussions please use the [Github Issues](https://github.com/canopas/UIPilot/issues).
 
 # Credits
 
