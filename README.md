@@ -17,9 +17,9 @@
 Visit [the website](https://canopas.github.io/UIPilot/) for documentation and examples.
 
 ## Complex use cases
-The library is designed to meet simples use cases as well as complex ones. You can also have nested `UIPilot` as many as you like!
+The library is designed to meet simple use cases as well as complex ones. You can also have nested `UIPilot` as many as you like!
 
-For example,. It's very easy to acheive split screen like behavior.
+For example, it's very easy to achieve split screen like behavior.
 
 <img src="https://github.com/canopas/UIPilot/blob/main/docs/assets/complex-routing.gif?raw=true" height="500" />
 
