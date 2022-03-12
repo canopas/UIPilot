@@ -11,7 +11,7 @@
 - APIs are inspired by the android, flutter and web based routers - Very simple and easy to use.
 - Typesafe navigation - Routing to wrong path will fail at compile time rather than runtime.
 - Typesafe parameters - Routing with wrong parameters will fail at compile time rather than runtime.
-- Very tiny library - it's barely 100 lines of code.
+- Very tiny library - it's barely 200 lines of code.
 
 ## How to use?
 
@@ -86,9 +86,9 @@ struct NestedDetail: View {
 ```
 
 ## Complex use cases
-The library is designed to meet simples use cases as well as complex ones. You can also have nested `UIPilot` as many as you like!
+The library is designed to meet simple use cases as well as complex ones. You can also have nested `UIPilot` as many as you like!
 
-For example,. It's very easy to acheive split screen like behavior.
+For example, it's very easy to achieve split screen like behavior.
 
 <img src="assets/complex-routing.gif?raw=true" height="500" />
 
@@ -110,8 +110,18 @@ dependencies: [
 ]
 ```
 
+### CocoaPods
+
+[CocoaPods][] is a dependency manager for Cocoa projects. For usage and installation instructions, visit their website. To integrate UIPilot into your Xcode project using CocoaPods, specify it in your Podfile:
+
+    target 'YourAppTargetName' do
+        pod 'UIPilot', '~> 1.1.5'
+    end
+
+[CocoaPods]: https://cocoapods.org
+
 # Bugs and Feedback
-For bugs, questions and discussions please use the [Github Issues](https://github.com/canopas/JetTapTarget/issues).
+For bugs, questions and discussions please use the [Github Issues](https://github.com/canopas/UIPilot/issues).
 
 # Credits
 
