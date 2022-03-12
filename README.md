@@ -11,7 +11,7 @@
 - APIs are inspired by the android, flutter and web based routers - Very simple and easy to use.
 - Typesafe navigation - Routing to wrong path will fail at compile time rather than runtime.
 - Typesafe parameters - Routing with wrong parameters will fail at compile time rather than runtime.
-- Very tiny library - it's barely 100 lines of code.
+- Very tiny library - it's barely 200 lines of code.
 
 ## Documentation
 Visit [the website](https://canopas.github.io/UIPilot/) for documentation and examples.
@@ -58,18 +58,4 @@ UIPilot is owned and maintained by the [Canopas](https://canopas.com/) team. You
 
 # Licence
 
-```
-Copyright 2022 Canopas Software LLP
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-```
+UIPilot is released under the MIT license. See [LICENSE](https://github.com/canopas/UIPilot/blob/main/LICENSE.md) for details.

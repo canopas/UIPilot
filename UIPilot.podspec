@@ -17,6 +17,7 @@ Pod::Spec.new do |s|
   s.module_name      = 'UIPilot'
   s.requires_arc     = true
   s.swift_version    = '5.5'
+
   s.preserve_paths   = 'README.md'
 
   s.ios.deployment_target     = '14.0'
