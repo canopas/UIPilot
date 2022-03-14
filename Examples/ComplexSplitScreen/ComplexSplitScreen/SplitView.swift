@@ -7,8 +7,6 @@
 
 import SwiftUI
 import UIPilot
-import WebKit
-
 
 enum FacebookAppRoute: Equatable {
     case Home
@@ -19,7 +17,6 @@ enum TwitterAppRoute: Equatable {
     case Home
     case Detail
 }
-
 
 struct SplitView: View {
     
@@ -35,6 +32,12 @@ struct SplitView: View {
                 case .Detail: return AnyView(FBDetail())
                 }
             }
+
+            Button("Go back") {
+                pilot.pop()
+            }.foregroundColor(.black)
+
+            // We can add more than 1 route in single app to create split screen
             UIPilotHost(twitterPilot)  { route in
                 switch route {
                 case .Home: return AnyView(TwitterHome())
@@ -42,20 +45,7 @@ struct SplitView: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationBarTitle("Apps", displayMode: .inline)
-    }
-}
-
-struct WebView: UIViewRepresentable {
-    
-    var url: URL
-    
-    func makeUIView(context: Context) -> WKWebView {
-        return WKWebView()
-    }
-    
-    func updateUIView(_ webView: WKWebView, context: Context) {
-        let request = URLRequest(url: url)
-        webView.load(request)
     }
 }

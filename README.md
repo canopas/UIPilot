@@ -16,6 +16,9 @@
 ## Documentation
 Visit [the website](https://canopas.github.io/UIPilot/) for documentation and examples.
 
+## Examples
+Please have a look at the [article](https://blog.canopas.com/swiftui-complex-navigation-made-easier-with-uipilot-5b33279f3476) and the [examples](https://github.com/canopas/UIPilot/tree/main/Examples) to know more about different use cases of UIPilot.
+
 ## Complex use cases
 The library is designed to meet simple use cases as well as complex ones. You can also have nested `UIPilot` as many as you like!
 
@@ -43,7 +46,7 @@ dependencies: [
 
 [CocoaPods][] is a dependency manager for Cocoa projects. For usage and installation instructions, visit their website. To integrate UIPilot into your Xcode project using CocoaPods, specify it in your Podfile:
 
-    target 'YourAppTargetName' do
+    target 'YourAppName' do
         pod 'UIPilot', '~> 1.1.5'
     end
 

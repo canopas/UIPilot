@@ -8,7 +8,10 @@
 import SwiftUI
 import UIPilot
 
+// Define routes of the app
 enum AppRoute: Equatable {
+
+    // As swift not able to identify type of closure by default
     static func == (lhs: AppRoute, rhs: AppRoute) -> Bool {
         return lhs.key == rhs.key
     }
@@ -16,7 +19,7 @@ enum AppRoute: Equatable {
     case Start
     case Home
     case SignIn
-    case Profile(callBack: (() -> Void))
+    case Profile(callBack: (() -> Void))  // Nonescaping Closure
 
     var key: String {
         switch self {
@@ -33,7 +36,7 @@ enum AppRoute: Equatable {
 }
 
 @main
-struct CallbackUseCaseApp: App {
+struct CallbackUseCase: App {
 
     @StateObject var pilot = UIPilot(initial: AppRoute.Start)
 
@@ -44,7 +47,7 @@ struct CallbackUseCaseApp: App {
                 case .Start: return AnyView(StartView())
                 case .Home: return AnyView(HomeView())
                 case .SignIn: return AnyView(SignInView())
-                case .Profile(let callback): return AnyView(ProfileView(onSignOut: callback))
+                case .Profile(let callback): return AnyView(ProfileView(onSignOut: callback)) // Pass callback closure
                 }
             }
         }

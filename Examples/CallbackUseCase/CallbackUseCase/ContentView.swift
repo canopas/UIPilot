@@ -10,7 +10,6 @@ import SwiftUI
 import UIPilot
 
 struct StartView: View {
-
     @EnvironmentObject var pilot: UIPilot<AppRoute>
 
     var body: some View {
@@ -25,9 +24,7 @@ struct StartView: View {
     }
 }
 
-
 struct HomeView: View {
-
     @EnvironmentObject var pilot: UIPilot<AppRoute>
 
     var body: some View {
@@ -37,25 +34,25 @@ struct HomeView: View {
             }
             .padding()
             .background(.green)
-        }.navigationTitle("Home")
+        }
+        .navigationTitle("Home")
     }
 }
 
-
 struct SignInView: View {
-
     @EnvironmentObject var pilot: UIPilot<AppRoute>
 
     var body: some View {
         VStack {
             Button("See your profile") {
-                pilot.push(.Profile(callBack: {
-                    self.pilot.popTo(.Home)
+                pilot.push(.Profile(callBack: { // Peform callback action
+                    self.pilot.popTo(.Home) // Pop from current screen to home route
                 }))
             }
             .padding()
             .background(.yellow)
-        }.navigationTitle("Sign In")
+        }
+        .navigationTitle("Sign In")
     }
 }
 
@@ -67,11 +64,11 @@ struct ProfileView: View {
     var body: some View {
         VStack {
             Button("Sign out")  {
-                onSignOut()
+                onSignOut() // Call closure
             }
             .padding()
             .background(.red)
-        }.navigationTitle("Profile")
+        }
+        .navigationTitle("Profile")
     }
 }
-

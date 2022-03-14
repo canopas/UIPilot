@@ -17,6 +17,8 @@ struct TwitterHome: View {
                 pilot.push(.Detail)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.yellow)
         .navigationTitle("Twitter Home")
     }
 }
@@ -30,6 +32,8 @@ struct TwitterDetail: View {
                 appPilot.push(.Browser("https://twitter.com/home"))
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.yellow)
         .navigationTitle("Twitter Post")
     }
 }
