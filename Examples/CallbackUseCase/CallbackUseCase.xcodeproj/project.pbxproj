@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5F8ED78227DCA07F00CF3062 /* CallbackUseCaseApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F8ED78127DCA07F00CF3062 /* CallbackUseCaseApp.swift */; };
+		5F8ED78227DCA07F00CF3062 /* CallbackUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F8ED78127DCA07F00CF3062 /* CallbackUseCase.swift */; };
 		5F8ED78427DCA07F00CF3062 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F8ED78327DCA07F00CF3062 /* ContentView.swift */; };
 		5F8ED78627DCA08100CF3062 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5F8ED78527DCA08100CF3062 /* Assets.xcassets */; };
 		5F8ED79127DCA13700CF3062 /* UIPilot in Frameworks */ = {isa = PBXBuildFile; productRef = 5F8ED79027DCA13700CF3062 /* UIPilot */; };
@@ -15,7 +15,7 @@
 
 /* Begin PBXFileReference section */
 		5F8ED77E27DCA07F00CF3062 /* CallbackUseCase.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CallbackUseCase.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		5F8ED78127DCA07F00CF3062 /* CallbackUseCaseApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallbackUseCaseApp.swift; sourceTree = "<group>"; };
+		5F8ED78127DCA07F00CF3062 /* CallbackUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallbackUseCase.swift; sourceTree = "<group>"; };
 		5F8ED78327DCA07F00CF3062 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		5F8ED78527DCA08100CF3062 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -52,7 +52,7 @@
 			isa = PBXGroup;
 			children = (
 				5F8ED78527DCA08100CF3062 /* Assets.xcassets */,
-				5F8ED78127DCA07F00CF3062 /* CallbackUseCaseApp.swift */,
+				5F8ED78127DCA07F00CF3062 /* CallbackUseCase.swift */,
 				5F8ED78327DCA07F00CF3062 /* ContentView.swift */,
 			);
 			path = CallbackUseCase;
@@ -134,7 +134,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5F8ED78427DCA07F00CF3062 /* ContentView.swift in Sources */,
-				5F8ED78227DCA07F00CF3062 /* CallbackUseCaseApp.swift in Sources */,
+				5F8ED78227DCA07F00CF3062 /* CallbackUseCase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

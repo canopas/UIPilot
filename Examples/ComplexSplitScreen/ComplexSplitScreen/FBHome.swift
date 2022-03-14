@@ -17,6 +17,8 @@ struct FBHome: View {
                 pilot.push(.Detail)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.mint)
         .navigationTitle("Facebook Home")
     }
 }
@@ -30,6 +32,8 @@ struct FBDetail: View {
                 appPilot.push(.Browser("https://facebook.com"))
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.mint)
         .navigationTitle("Facebook Post")
     }
 }

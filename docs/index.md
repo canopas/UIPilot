@@ -15,6 +15,8 @@
 
 ## How to use?
 
+### Simple route by enum
+
 ```swift
 // Define routes of the app
 enum AppRoute: Equatable {
@@ -85,6 +87,105 @@ struct NestedDetail: View {
 }
 ```
 
+### Enum route with callback
+
+```swift
+enum AppRoute: Equatable {
+
+    // As swift not able to identify type of closure by default
+    static func == (lhs: AppRoute, rhs: AppRoute) -> Bool {
+        return lhs.key == rhs.key
+    }
+
+    case Start
+    case Home
+    case SignIn
+    case Profile(callBack: (() -> Void))  // Nonescaping Closure
+
+    var key: String {
+        switch self {
+        case .Start:
+            return "Start"
+        case .Home:
+            return "Home"
+        case .SignIn:
+            return "SignIn"
+        case .Profile:
+            return "Profile"
+        }
+    }
+}
+
+@main
+struct CallbackUseCaseApp: App {
+    @StateObject var pilot = UIPilot(initial: AppRoute.Start)
+
+    var body: some Scene {
+        WindowGroup {
+            UIPilotHost(pilot)  { route in
+                switch route {
+                case .Start: return AnyView(StartView())
+                case .Home: return AnyView(HomeView())
+                case .SignIn: return AnyView(SignInView())
+                case .Profile(let callback): return AnyView(ProfileView(onSignOut: callback)) // Pass callback closure
+                }
+            }
+        }
+    }
+}
+
+struct StartView: View {
+    @EnvironmentObject var pilot: UIPilot<AppRoute>
+
+    var body: some View {
+        VStack {
+            Button("Let's Start") {
+                pilot.push(.Home)
+            }
+        }.navigationTitle("Start")
+    }
+}
+
+struct HomeView: View {
+    @EnvironmentObject var pilot: UIPilot<AppRoute>
+
+    var body: some View {
+        VStack {
+            Button("Sign In") {
+                pilot.push(.SignIn)
+            }
+        }.navigationTitle("Home")
+    }
+}
+
+struct SignInView: View {
+    @EnvironmentObject var pilot: UIPilot<AppRoute>
+
+    var body: some View {
+        VStack {
+            Button("See your profile") {
+                pilot.push(.Profile(callBack: { // Peform callback action
+                    self.pilot.popTo(.Home)     // Pop from current screen to home route
+                }))
+            }
+        }.navigationTitle("Sign In")
+    }
+}
+
+struct ProfileView: View {
+    @EnvironmentObject var pilot: UIPilot<AppRoute>
+    let onSignOut: (() -> Void)
+
+    var body: some View {
+        VStack {
+            Button("Sign out")  {
+                onSignOut()   // Call closure
+            }
+        }.navigationTitle("Profile")
+    }
+}
+```
+
 ## Complex use cases
 The library is designed to meet simple use cases as well as complex ones. You can also have nested `UIPilot` as many as you like!
 
@@ -92,9 +193,118 @@ For example, it's very easy to achieve split screen like behavior.
 
 <img src="assets/complex-routing.gif?raw=true" height="500" />
 
-# Interested in library implementation?
+```swift
 
-Please have a look at the [article](https://blog.canopas.com/swiftui-complex-navigation-made-easier-with-uipilot-5b33279f3476) for more information of the implementation.
+enum AppRoute: Equatable {
+    case Home
+    case Split
+    case Browser(_ url: String)
+}
+
+@main
+struct ComplexSplitScreen: App {
+    @StateObject var pilot = UIPilot(initial: AppRoute.Home)
+
+    var body: some Scene {
+        WindowGroup {
+            UIPilotHost(pilot)  { route in
+                switch route {
+                case .Home: return AnyView(HomeView())
+                case .Split: return AnyView(SplitView())
+                case .Browser(let url): return AnyView(WebView(url: URL(string: url)!))
+                }
+            }
+        }
+    }
+}
+
+struct WebView: UIViewRepresentable {
+    var url: URL
+
+    func makeUIView(context: Context) -> WKWebView {
+        return WKWebView()
+    }
+
+    func updateUIView(_ webView: WKWebView, context: Context) {
+        let request = URLRequest(url: url)
+        webView.load(request)
+    }
+}
+
+struct HomeView: View {
+    @EnvironmentObject var pilot: UIPilot<AppRoute>
+
+    var body: some View {
+        VStack {
+            Button("Go to split screen") {
+               pilot.push(.Split)
+            }.foregroundColor(.white)
+        }.navigationTitle("Home")
+    }
+}
+
+enum FacebookAppRoute: Equatable {
+    case Home
+    case Detail
+}
+
+enum TwitterAppRoute: Equatable {
+    case Home
+    case Detail
+}
+
+struct SplitView: View {
+    @EnvironmentObject var pilot: UIPilot<AppRoute>
+    @StateObject var fbPilot = UIPilot(initial: FacebookAppRoute.Home)
+    @StateObject var twitterPilot = UIPilot(initial: TwitterAppRoute.Home)
+    
+    var body: some View {
+        VStack {
+            UIPilotHost(fbPilot)  { route in
+                switch route {
+                case .Home: return AnyView(FBHome())
+                case .Detail: return AnyView(FBDetail())
+                }
+            }
+            // We can add more than 1 route in single app to create split screen
+            UIPilotHost(twitterPilot)  { route in
+                switch route {
+                case .Home: return AnyView(TwitterHome())
+                case .Detail: return AnyView(TwitterDetail())
+                }
+            }
+        }.navigationBarTitle("Apps", displayMode: .inline)
+    }
+}
+
+struct FBHome: View {
+    @EnvironmentObject var pilot: UIPilot<FacebookAppRoute>
+
+    var body: some View {
+        VStack {
+            Button("Open FB post") {
+                pilot.push(.Detail)
+            }
+        }.navigationTitle("Facebook Home")
+    }
+}
+
+struct FBDetail: View {
+    @EnvironmentObject var appPilot: UIPilot<AppRoute>
+
+    var body: some View {
+        VStack {
+            Button("Open in browser") {
+                appPilot.push(.Browser("https://facebook.com"))
+            }
+        }.navigationTitle("Facebook Post")
+    }
+}
+```
+
+## Examples
+
+Please have a look at the [article](https://blog.canopas.com/swiftui-complex-navigation-made-easier-with-uipilot-5b33279f3476) and the [examples](https://github.com/canopas/UIPilot/tree/main/Examples) to know more about different use cases of UIPilot.
 
 ## Installation
 
@@ -114,7 +324,7 @@ dependencies: [
 
 [CocoaPods][] is a dependency manager for Cocoa projects. For usage and installation instructions, visit their website. To integrate UIPilot into your Xcode project using CocoaPods, specify it in your Podfile:
 
-    target 'YourAppTargetName' do
+    target 'YourAppName' do
         pod 'UIPilot', '~> 1.1.5'
     end
 
