@@ -14,7 +14,7 @@
 - Very tiny library - it's barely 200 lines of code.
 
 ## Documentation
-Visit [the website](https://canopas.github.io/UIPilot/) for documentation and examples.
+Visit [the website](https://canopas.github.io/UIPilot/) for documentation and more information.
 
 ## Examples
 Please have a look at the [article](https://blog.canopas.com/swiftui-complex-navigation-made-easier-with-uipilot-5b33279f3476) and the [examples](https://github.com/canopas/UIPilot/tree/main/Examples) to know more about different use cases of UIPilot.
