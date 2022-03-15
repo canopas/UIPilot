@@ -13,6 +13,13 @@
 - Typesafe parameters - Routing with wrong parameters will fail at compile time rather than runtime.
 - Very tiny library - it's barely 200 lines of code.
 
+## Worried about usage of AnyView?
+Well, according to official [apple docs](https://developer.apple.com/documentation/swiftui/anyview)
+> An AnyView allows changing the type of view used in a given view hierarchy. Whenever the type of view used with an AnyView changes, the old hierarchy is destroyed and a new hierarchy is created for the new type.
+
+View is recreated only if underlying type changes and that never happens in the case of UIPilot as each route is mapped to a particular view.
+
+
 ## How to use?
 
 ### Simple route by enum
