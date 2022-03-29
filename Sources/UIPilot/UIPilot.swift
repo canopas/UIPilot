@@ -2,6 +2,7 @@ import SwiftUI
 import Combine
 
 public class UIPilot<T: Equatable>: ObservableObject {
+
     var paths: [Path<T>] = [] {
         didSet { updateViewState() }
     }
@@ -9,10 +10,14 @@ public class UIPilot<T: Equatable>: ObservableObject {
     var routeMap: RouteMap<T>? {
         didSet { updateViewState() }
     }
-    
+
+    let logger: Logger
     var state: UIPilotViewState<T>!
     
-    public init(initial: T) {
+    public init(initial: T, debug: Bool = false) {
+        logger = debug ? DebugLog() : EmptyLog()
+        logger.log("UIPilot - Pilot Initialized.")
+
         state = UIPilotViewState(onPop: { [weak self] in
             self?.pop()
         })
@@ -20,21 +25,27 @@ public class UIPilot<T: Equatable>: ObservableObject {
     }
     
     public func push(_ route: T) {
+        logger.log("UIPilot - Pushing \(route) route.")
         self.paths.append(Path(route: route))
     }
     
     public func pop() {
         if !self.paths.isEmpty {
+            logger.log("UIPilot - Route popped.")
             self.paths.removeLast()
         }
     }
     
     public func popTo(_ route: T, inclusive: Bool = false) {
+        logger.log("UIPilot: Popping route \(route).")
+
         if paths.isEmpty {
+            logger.log("UIPilot - Path is empty.")
             return
         }
         
         guard var found = paths.firstIndex(where: { $0.route == route }) else {
+            logger.log("UIPilot - Route not found.")
             return
         }
         
@@ -43,12 +54,14 @@ public class UIPilot<T: Equatable>: ObservableObject {
         }
         
         for _ in found..<paths.count {
+            logger.log("UIPilot - Route \(route) Popped.")
             pop()
         }
     }
     
     private func updateViewState() {
         if let routeMap = routeMap {
+            logger.log("UIPilot - Updating route state.")
             state.onPathsChanged(paths: paths, routeMap: routeMap)
         }
     }
@@ -68,9 +81,7 @@ struct Path<T: Equatable>: Equatable, Hashable {
 }
 
 struct PathView: View {
-    
     private let content: AnyView
-
     @ObservedObject var state: PathViewState
 
     public init(_ content: AnyView, state: PathViewState) {
@@ -119,11 +130,10 @@ class PathViewState: ObservableObject {
 class UIPilotViewState<T: Equatable>: ObservableObject {
     
     private let onPop: () -> Void
-    
     private var pathViews = [Path<T>: PathView]()
 
     @Published var content: PathView? = nil
-    
+
     init(onPop: @escaping () -> Void) {
         self.onPop = onPop
     }
@@ -138,7 +148,7 @@ class UIPilotViewState<T: Equatable>: ObservableObject {
         var current: PathView? = nil
         for path in paths.reversed() {
             var content = pathViews[path]
-            
+
             if content == nil {
                 pathViews[path] = PathView(routeMap(path.route), state: PathViewState())
                 content = pathViews[path]
@@ -151,10 +161,8 @@ class UIPilotViewState<T: Equatable>: ObservableObject {
                     self.onPop()
                 }
             }
-
             current = content
         }
-        
         return current
     }
     
@@ -191,4 +199,8 @@ public struct UIPilotHost<T: Equatable>: View {
 #endif
         .environmentObject(pilot)
     }
+}
+
+protocol Logger {
+    func log(_ value: String)
 }
