@@ -4,7 +4,11 @@ import Combine
 public class UIPilot<T: Equatable>: ObservableObject {
 
     var paths: [Path<T>] = [] {
-        didSet { updateViewState() }
+        didSet {
+            if showTransition {
+                updateViewState()
+            }
+        }
     }
 
     var routeMap: RouteMap<T>? {
@@ -13,7 +17,8 @@ public class UIPilot<T: Equatable>: ObservableObject {
 
     let logger: Logger
     var state: UIPilotViewState<T>!
-    
+    private var showTransition: Bool = true
+
     public init(initial: T, debug: Bool = false) {
         logger = debug ? DebugLog() : EmptyLog()
         logger.log("UIPilot - Pilot Initialized.")
@@ -36,7 +41,7 @@ public class UIPilot<T: Equatable>: ObservableObject {
         }
     }
     
-    public func popTo(_ route: T, inclusive: Bool = false) {
+    public func popTo(_ route: T, inclusive: Bool = false, showIntermediateTransitions: Bool = false) {
         logger.log("UIPilot: Popping route \(route).")
 
         if paths.isEmpty {
@@ -53,9 +58,21 @@ public class UIPilot<T: Equatable>: ObservableObject {
             found += 1
         }
         
-        for _ in found..<paths.count {
-            logger.log("UIPilot - Route \(route) Popped.")
+        if !showIntermediateTransitions {
+            // remove intermediate paths, supressing transition animations
+            let numToPop = (found..<paths.endIndex).count - 1
+            logger.log("UIPilot - Popping \(numToPop + 1) routes")
+            showTransition = false
+            paths.removeLast(numToPop)
+            showTransition = true
+            // pop the final path with a transition animation
             pop()
+        } else {
+            // pop showing all transitions
+            for _ in found..<paths.count {
+                logger.log("UIPilot - Route \(route) Popped.")
+                pop()
+            }
         }
     }
     
