@@ -4,11 +4,7 @@ import Combine
 public class UIPilot<T: Equatable>: ObservableObject {
 
     var paths: [Path<T>] = [] {
-        didSet {
-            if showTransition {
-                updateViewState()
-            }
-        }
+        didSet { updateViewState() }
     }
 
     var routeMap: RouteMap<T>? {
@@ -17,8 +13,7 @@ public class UIPilot<T: Equatable>: ObservableObject {
 
     let logger: Logger
     var state: UIPilotViewState<T>!
-    private var showTransition: Bool = true
-
+    
     public init(initial: T, debug: Bool = false) {
         logger = debug ? DebugLog() : EmptyLog()
         logger.log("UIPilot - Pilot Initialized.")
@@ -60,13 +55,9 @@ public class UIPilot<T: Equatable>: ObservableObject {
         
         if !showIntermediateTransitions {
             // remove intermediate paths, supressing transition animations
-            let numToPop = (found..<paths.endIndex).count - 1
-            logger.log("UIPilot - Popping \(numToPop + 1) routes")
-            showTransition = false
+            let numToPop = (found..<paths.endIndex).count
+            logger.log("UIPilot - Popping \(numToPop) routes")
             paths.removeLast(numToPop)
-            showTransition = true
-            // pop the final path with a transition animation
-            pop()
         } else {
             // pop showing all transitions
             for _ in found..<paths.count {
