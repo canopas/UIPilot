@@ -36,7 +36,7 @@ public class UIPilot<T: Equatable>: ObservableObject {
         }
     }
     
-    public func popTo(_ route: T, inclusive: Bool = false, showIntermediateTransitions: Bool = false) {
+    public func popTo(_ route: T, inclusive: Bool = false) {
         logger.log("UIPilot: Popping route \(route).")
 
         if paths.isEmpty {
@@ -53,18 +53,9 @@ public class UIPilot<T: Equatable>: ObservableObject {
             found += 1
         }
         
-        if !showIntermediateTransitions {
-            // remove intermediate paths, supressing transition animations
-            let numToPop = (found..<paths.endIndex).count
-            logger.log("UIPilot - Popping \(numToPop) routes")
-            paths.removeLast(numToPop)
-        } else {
-            // pop showing all transitions
-            for _ in found..<paths.count {
-                logger.log("UIPilot - Route \(route) Popped.")
-                pop()
-            }
-        }
+        let numToPop = (found..<paths.endIndex).count
+        logger.log("UIPilot - Popping \(numToPop) routes")
+        paths.removeLast(numToPop)
     }
     
     private func updateViewState() {
