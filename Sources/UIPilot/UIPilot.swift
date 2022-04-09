@@ -3,6 +3,9 @@ import Combine
 
 public class UIPilot<T: Equatable>: ObservableObject {
 
+    let logger: Logger
+    var state: UIPilotViewState<T>!
+
     var paths: [Path<T>] = [] {
         didSet { updateViewState() }
     }
@@ -10,9 +13,6 @@ public class UIPilot<T: Equatable>: ObservableObject {
     var routeMap: RouteMap<T>? {
         didSet { updateViewState() }
     }
-
-    let logger: Logger
-    var state: UIPilotViewState<T>!
     
     public var stack: [T] {
         return paths.map { $0.route }
