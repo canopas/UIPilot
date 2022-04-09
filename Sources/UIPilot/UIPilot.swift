@@ -53,10 +53,9 @@ public class UIPilot<T: Equatable>: ObservableObject {
             found += 1
         }
         
-        for _ in found..<paths.count {
-            logger.log("UIPilot - Route \(route) Popped.")
-            pop()
-        }
+        let numToPop = (found..<paths.endIndex).count
+        logger.log("UIPilot - Popping \(numToPop) routes")
+        paths.removeLast(numToPop)
     }
     
     private func updateViewState() {
