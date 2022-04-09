@@ -14,6 +14,10 @@ public class UIPilot<T: Equatable>: ObservableObject {
     let logger: Logger
     var state: UIPilotViewState<T>!
     
+    public var stack: [T] {
+        return paths.map { $0.route }
+    }
+    
     public init(initial: T, debug: Bool = false) {
         logger = debug ? DebugLog() : EmptyLog()
         logger.log("UIPilot - Pilot Initialized.")
