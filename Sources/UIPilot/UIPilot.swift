@@ -3,43 +3,38 @@ import Combine
 
 public class UIPilot<T: Equatable>: ObservableObject {
 
-    let logger: Logger
-    var state: UIPilotViewState<T>!
+    private let logger: Logger
+    private let viewGenerator = PathViewGenerator<T>()
 
-    var paths: [Path<T>] = [] {
-        didSet { updateViewState() }
-    }
+    @Published var paths: [UIPilotPath<T>] = []
 
-    var routeMap: RouteMap<T>? {
-        didSet { updateViewState() }
-    }
-    
     public var stack: [T] {
         return paths.map { $0.route }
     }
-    
+
     public init(initial: T, debug: Bool = false) {
         logger = debug ? DebugLog() : EmptyLog()
         logger.log("UIPilot - Pilot Initialized.")
 
-        state = UIPilotViewState(onPop: { [weak self] in
+        viewGenerator.onPop = { [weak self] in
             self?.pop()
-        })
+        }
+
         push(initial)
     }
-    
+
     public func push(_ route: T) {
         logger.log("UIPilot - Pushing \(route) route.")
-        self.paths.append(Path(route: route))
+        self.paths.append(UIPilotPath(route: route))
     }
-    
+
     public func pop() {
         if !self.paths.isEmpty {
             logger.log("UIPilot - Route popped.")
             self.paths.removeLast()
         }
     }
-    
+
     public func popTo(_ route: T, inclusive: Bool = false) {
         logger.log("UIPilot: Popping route \(route).")
 
@@ -47,37 +42,34 @@ public class UIPilot<T: Equatable>: ObservableObject {
             logger.log("UIPilot - Path is empty.")
             return
         }
-        
+
         guard var found = paths.firstIndex(where: { $0.route == route }) else {
             logger.log("UIPilot - Route not found.")
             return
         }
-        
+
         if !inclusive {
             found += 1
         }
-        
+
         let numToPop = (found..<paths.endIndex).count
         logger.log("UIPilot - Popping \(numToPop) routes")
         paths.removeLast(numToPop)
     }
-    
-    private func updateViewState() {
-        if let routeMap = routeMap {
-            logger.log("UIPilot - Updating route state.")
-            state.onPathsChanged(paths: paths, routeMap: routeMap)
-        }
+
+    func getView(_ paths: [UIPilotPath<T>], _ routeMap: RouteMap<T>, _ pathViews: [UIPilotPath<T>: PathView]) -> (PathView?, [UIPilotPath<T>: PathView]) {
+        return viewGenerator.generate(paths, routeMap, pathViews)
     }
 }
 
-struct Path<T: Equatable>: Equatable, Hashable {
+struct UIPilotPath<T: Equatable>: Equatable, Hashable {
     let route: T
     let id: String = UUID().uuidString
-    
-    static func == (lhs: Path, rhs: Path) -> Bool {
+
+    static func == (lhs: UIPilotPath, rhs: UIPilotPath) -> Bool {
         return lhs.route == rhs.route && lhs.id == rhs.id
     }
-    
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
@@ -114,41 +106,30 @@ class PathViewState: ObservableObject {
             }
         }
     }
-    
+
     @Published
-    var next: PathView? = nil {
+    var next: PathView? {
         didSet {
             isActive = next != nil
         }
     }
-    
+
     var onPop: () -> Void
-    
+
     init(next: PathView? = nil, onPop: @escaping () -> Void = {}) {
         self.next = next
         self.onPop = onPop
     }
 }
 
-class UIPilotViewState<T: Equatable>: ObservableObject {
-    
-    private let onPop: () -> Void
-    private var pathViews = [Path<T>: PathView]()
+class PathViewGenerator<T: Equatable> {
 
-    @Published var content: PathView? = nil
+    var onPop: (() -> Void)?
 
-    init(onPop: @escaping () -> Void) {
-        self.onPop = onPop
-    }
-    
-    func onPathsChanged(paths: [Path<T>], routeMap: RouteMap<T>) {
-        content = getView(paths, routeMap)
-    }
+    func generate(_ paths: [UIPilotPath<T>], _ routeMap: RouteMap<T>, _ pathViews: [UIPilotPath<T>: PathView]) -> (PathView?, [UIPilotPath<T>: PathView]) {
+        var pathViews = recycleViews(paths, pathViews: pathViews)
 
-    func getView(_ paths: [Path<T>], _ routeMap: RouteMap<T>) -> PathView? {
-        recycleViews(paths)
-
-        var current: PathView? = nil
+        var current: PathView?
         for path in paths.reversed() {
             var content = pathViews[path]
 
@@ -156,25 +137,27 @@ class UIPilotViewState<T: Equatable>: ObservableObject {
                 pathViews[path] = PathView(routeMap(path.route), state: PathViewState())
                 content = pathViews[path]
             }
-            
+
             content?.state.next = current
             content?.state.onPop = current == nil ? {} : { [weak self] in
                 if let self = self, !paths.isEmpty,
                    paths.last != path {
-                    self.onPop()
+                    self.onPop?()
                 }
             }
             current = content
         }
-        return current
+        return (current, pathViews)
     }
-    
-    private func recycleViews(_ paths: [Path<T>]) {
+
+    private func recycleViews(_ paths: [UIPilotPath<T>], pathViews: [UIPilotPath<T>: PathView]) -> [UIPilotPath<T>: PathView] {
+        var pathViews = pathViews
         for key in pathViews.keys {
             if !paths.contains(key) {
                 pathViews.removeValue(forKey: key)
             }
         }
+        return pathViews
     }
 }
 
@@ -182,25 +165,34 @@ public typealias RouteMap<T> = (T) -> AnyView
 
 public struct UIPilotHost<T: Equatable>: View {
 
-    private let pilot: UIPilot<T>
-
     @ObservedObject
-    private var state: UIPilotViewState<T>
+    private var pilot: UIPilot<T>
+
+    private let routeMap: RouteMap<T>
+
+    @State
+    var pathViews = [UIPilotPath<T>: PathView]()
+    @State
+    var content: PathView?
 
     public init(_ pilot: UIPilot<T>, _ routeMap: @escaping RouteMap<T>) {
         self.pilot = pilot
-        self.state = pilot.state
-        self.pilot.routeMap = routeMap
+        self.routeMap = routeMap
     }
 
     public var body: some View {
         NavigationView {
-            state.content
+            content
         }
 #if !os(macOS)
         .navigationViewStyle(.stack)
 #endif
         .environmentObject(pilot)
+        .onReceive(pilot.$paths) { paths in
+            let (newContent, newPathViews) = pilot.getView(paths, routeMap, pathViews)
+            self.content = newContent
+            self.pathViews = newPathViews
+        }
     }
 }
 
