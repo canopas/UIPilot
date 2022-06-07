@@ -16,8 +16,11 @@ public class UIPilot<T: Equatable>: ObservableObject {
         logger = debug ? DebugLog() : EmptyLog()
         logger.log("UIPilot - Pilot Initialized.")
 
-        viewGenerator.onPop = { [weak self] in
-            self?.pop()
+        viewGenerator.onPop = { [weak self] path in
+            if let self = self, self.paths.count > 1
+                && path.id == self.paths[self.paths.count - 2].id {
+                    self.pop()
+            }
         }
 
         push(initial)
@@ -124,7 +127,7 @@ class PathViewState: ObservableObject {
 
 class PathViewGenerator<T: Equatable> {
 
-    var onPop: (() -> Void)?
+    var onPop: ((UIPilotPath<T>) -> Void)?
 
     func generate(_ paths: [UIPilotPath<T>], _ routeMap: RouteMap<T>, _ pathViews: [UIPilotPath<T>: PathView]) -> (PathView?, [UIPilotPath<T>: PathView]) {
         var pathViews = recycleViews(paths, pathViews: pathViews)
@@ -140,9 +143,8 @@ class PathViewGenerator<T: Equatable> {
 
             content?.state.next = current
             content?.state.onPop = current == nil ? {} : { [weak self] in
-                if let self = self, !paths.isEmpty,
-                   paths.last != path {
-                    self.onPop?()
+                if let self = self {
+                    self.onPop?(path)
                 }
             }
             current = content
