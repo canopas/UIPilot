@@ -60,7 +60,7 @@ public class UIPilot<T: Equatable>: ObservableObject {
         paths.removeLast(numToPop)
     }
 
-    func getView(_ paths: [UIPilotPath<T>], _ routeMap: RouteMap<T>, _ pathViews: [UIPilotPath<T>: PathView]) -> (PathView?, [UIPilotPath<T>: PathView]) {
+    func getView<Screen: View>(_ paths: [UIPilotPath<T>], _ routeMap: RouteMap<T, Screen>, _ pathViews: [UIPilotPath<T>: Screen]) -> (PathView<Screen>?, [UIPilotPath<T>: Screen]) {
         return viewGenerator.generate(paths, routeMap, pathViews)
     }
 }
@@ -78,11 +78,11 @@ struct UIPilotPath<T: Equatable>: Equatable, Hashable {
     }
 }
 
-struct PathView: View {
-    private let content: AnyView
-    @ObservedObject var state: PathViewState
+struct PathView<Screen: View>: View {
+    private let content: Screen
+    @ObservedObject var state: PathViewState<Screen>
 
-    public init(_ content: AnyView, state: PathViewState) {
+    public init(_ content: Screen, state: PathViewState<Screen>) {
         self.content = content
         self.state = state
     }
@@ -100,7 +100,7 @@ struct PathView: View {
     }
 }
 
-class PathViewState: ObservableObject {
+class PathViewState<Screen: View>: ObservableObject {
     @Published
     var isActive: Bool = false {
         didSet {
@@ -111,7 +111,7 @@ class PathViewState: ObservableObject {
     }
 
     @Published
-    var next: PathView? {
+    var next: PathView<Screen>? {
         didSet {
             isActive = next != nil
         }
@@ -119,7 +119,7 @@ class PathViewState: ObservableObject {
 
     var onPop: () -> Void
 
-    init(next: PathView? = nil, onPop: @escaping () -> Void = {}) {
+    init(next: PathView<Screen>? = nil, onPop: @escaping () -> Void = {}) {
         self.next = next
         self.onPop = onPop
     }
@@ -129,20 +129,22 @@ class PathViewGenerator<T: Equatable> {
 
     var onPop: ((UIPilotPath<T>) -> Void)?
 
-    func generate(_ paths: [UIPilotPath<T>], _ routeMap: RouteMap<T>, _ pathViews: [UIPilotPath<T>: PathView]) -> (PathView?, [UIPilotPath<T>: PathView]) {
+    func generate<Screen: View>(
+        _ paths: [UIPilotPath<T>],
+        @ViewBuilder _  routeMap: RouteMap<T, Screen>,
+        _ pathViews: [UIPilotPath<T>: Screen]) -> (PathView<Screen>?,
+                                                     [UIPilotPath<T>: Screen]) {
         var pathViews = recycleViews(paths, pathViews: pathViews)
 
-        var current: PathView?
+        var current: PathView<Screen>?
         for path in paths.reversed() {
-            var content = pathViews[path]
+            let view = pathViews[path] ?? routeMap(path.route)
+            pathViews[path] = view
+ 
+            let content = PathView(view, state: PathViewState())
 
-            if content == nil {
-                pathViews[path] = PathView(routeMap(path.route), state: PathViewState())
-                content = pathViews[path]
-            }
-
-            content?.state.next = current
-            content?.state.onPop = current == nil ? {} : { [weak self] in
+            content.state.next = current
+            content.state.onPop = current == nil ? {} : { [weak self] in
                 if let self = self {
                     self.onPop?(path)
                 }
@@ -152,7 +154,7 @@ class PathViewGenerator<T: Equatable> {
         return (current, pathViews)
     }
 
-    private func recycleViews(_ paths: [UIPilotPath<T>], pathViews: [UIPilotPath<T>: PathView]) -> [UIPilotPath<T>: PathView] {
+    private func recycleViews<Screen: View>(_ paths: [UIPilotPath<T>], pathViews: [UIPilotPath<T>: Screen]) -> [UIPilotPath<T>: Screen] {
         var pathViews = pathViews
         for key in pathViews.keys {
             if !paths.contains(key) {
@@ -163,21 +165,22 @@ class PathViewGenerator<T: Equatable> {
     }
 }
 
-public typealias RouteMap<T> = (T) -> AnyView
+public typealias RouteMap<T, Screen> = (T) -> Screen
 
-public struct UIPilotHost<T: Equatable>: View {
+public struct UIPilotHost<T: Equatable, Screen: View>: View {
 
     @ObservedObject
     private var pilot: UIPilot<T>
 
-    private let routeMap: RouteMap<T>
+    @ViewBuilder
+    let routeMap: RouteMap<T, Screen>
 
     @State
-    var pathViews = [UIPilotPath<T>: PathView]()
+    var pathViews = [UIPilotPath<T>: Screen]()
     @State
-    var content: PathView?
+    var content: PathView<Screen>?
 
-    public init(_ pilot: UIPilot<T>, _ routeMap: @escaping RouteMap<T>) {
+    public init(_ pilot: UIPilot<T>, @ViewBuilder _ routeMap: @escaping RouteMap<T, Screen>) {
         self.pilot = pilot
         self.routeMap = routeMap
     }
