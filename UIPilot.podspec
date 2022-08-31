@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "UIPilot"
-  s.version          = "1.2.1"
+  s.version          = "1.3.0"
   s.summary          = "The missing type-safe, SwiftUI navigation library."
 
   s.description      = <<-DESC
