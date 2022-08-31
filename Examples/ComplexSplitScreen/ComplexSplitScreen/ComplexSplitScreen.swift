@@ -23,9 +23,9 @@ struct ComplexSplitScreen: App {
         WindowGroup {
             UIPilotHost(pilot)  { route in
                 switch route {
-                case .Home: return AnyView(HomeView())
-                case .Split: return AnyView(SplitView())
-                case .Browser(let url): return AnyView(WebView(url: URL(string: url)!))
+                case .Home: HomeView()
+                case .Split: SplitView()
+                case .Browser(let url): WebView(url: URL(string: url)!)
                 }
             }
         }

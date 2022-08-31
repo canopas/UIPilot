@@ -17,11 +17,10 @@ struct StringRoutes: App {
         WindowGroup {
             UIPilotHost(pilot)  { route in
                 switch route {
-                case "/start": return AnyView(StartPage())
-                case "/home": return AnyView(HomePage())
-                case "/profile": return AnyView(ProfilePage())
-                default:
-                    return AnyView(EmptyView())
+                case "/start": StartPage()
+                case "/home": HomePage()
+                case "/profile": ProfilePage()
+                default: EmptyView()
                 }
             }
         }

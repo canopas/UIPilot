@@ -1,16 +1,14 @@
 {
-  "object": {
-    "pins": [
-      {
-        "package": "UIPilot",
-        "repositoryURL": "https://github.com/canopas/UIPilot.git",
-        "state": {
-          "branch": null,
-          "revision": "3200fdd6cd0c8a7de429dc37ed1fb03f4f2ac21a",
-          "version": "1.1.5"
-        }
+  "pins" : [
+    {
+      "identity" : "uipilot",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/canopas/UIPilot.git",
+      "state" : {
+        "revision" : "34abdee9eb7cb41679ed0f5b052a9bdf31b10c68",
+        "version" : "1.3.0"
       }
-    ]
-  },
-  "version": 1
+    }
+  ],
+  "version" : 2
 }
