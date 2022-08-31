@@ -13,12 +13,6 @@
 - Typesafe parameters - Routing with wrong parameters will fail at compile time rather than runtime.
 - Very tiny library - it's barely 200 lines of code.
 
-## Worried about usage of AnyView?
-Well, according to official [apple docs](https://developer.apple.com/documentation/swiftui/anyview)
-> An AnyView allows changing the type of view used in a given view hierarchy. Whenever the type of view used with an AnyView changes, the old hierarchy is destroyed and a new hierarchy is created for the new type.
-
-View is recreated only if underlying type changes and that never happens in the case of UIPilot as each route is mapped to a particular view.
-
 
 ## How to use?
 
@@ -40,9 +34,9 @@ struct ContentView: View {
     var body: some View {
         UIPilotHost(pilot)  { route in
             switch route {
-                case .Home: return AnyView(HomeView())
-                case .Detail(let id): return AnyView(DetailView(id: id))
-                case .NestedDetail: return AnyView(NestedDetail())
+                case .Home: HomeView()
+                case .Detail(let id): DetailView(id: id)
+                case .NestedDetail: NestedDetail()
             }
         }
     }
@@ -131,10 +125,10 @@ struct CallbackUseCaseApp: App {
         WindowGroup {
             UIPilotHost(pilot)  { route in
                 switch route {
-                case .Start: return AnyView(StartView())
-                case .Home: return AnyView(HomeView())
-                case .SignIn: return AnyView(SignInView())
-                case .Profile(let callback): return AnyView(ProfileView(onSignOut: callback)) // Pass callback closure
+                case .Start: StartView()
+                case .Home: HomeView()
+                case .SignIn: SignInView()
+                case .Profile(let callback): ProfileView(onSignOut: callback) // Pass callback closure
                 }
             }
         }
@@ -216,9 +210,9 @@ struct ComplexSplitScreen: App {
         WindowGroup {
             UIPilotHost(pilot)  { route in
                 switch route {
-                case .Home: return AnyView(HomeView())
-                case .Split: return AnyView(SplitView())
-                case .Browser(let url): return AnyView(WebView(url: URL(string: url)!))
+                case .Home: HomeView()
+                case .Split: SplitView()
+                case .Browser(let url): WebView(url: URL(string: url)!)
                 }
             }
         }
@@ -269,15 +263,15 @@ struct SplitView: View {
         VStack {
             UIPilotHost(fbPilot)  { route in
                 switch route {
-                case .Home: return AnyView(FBHome())
-                case .Detail: return AnyView(FBDetail())
+                case .Home: FBHome()
+                case .Detail: FBDetail()
                 }
             }
             // We can add more than 1 route in single app to create split screen
             UIPilotHost(twitterPilot)  { route in
                 switch route {
-                case .Home: return AnyView(TwitterHome())
-                case .Detail: return AnyView(TwitterDetail())
+                case .Home: TwitterHome()
+                case .Detail: TwitterDetail()
                 }
             }
         }.navigationBarTitle("Apps", displayMode: .inline)
