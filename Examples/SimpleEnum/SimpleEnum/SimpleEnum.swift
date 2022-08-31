@@ -25,9 +25,9 @@ struct SimpleEnum: App {
         WindowGroup {
             UIPilotHost(pilot)  { route in
                 switch route {
-                    case .Home: return AnyView(HomeView())
-                    case .Detail(let id): return AnyView(DetailView(id: id))
-                    case .NestedDetail: return AnyView(NestedDetail())
+                    case .Home: HomeView()
+                    case .Detail(let id): DetailView(id: id)
+                    case .NestedDetail: NestedDetail()
                 }
             }
         }

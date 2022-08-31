@@ -44,10 +44,10 @@ struct CallbackUseCase: App {
         WindowGroup {
             UIPilotHost(pilot)  { route in
                 switch route {
-                case .Start: return AnyView(StartView())
-                case .Home: return AnyView(HomeView())
-                case .SignIn: return AnyView(SignInView())
-                case .Profile(let callback): return AnyView(ProfileView(onSignOut: callback)) // Pass callback closure
+                case .Start: StartView()
+                case .Home: HomeView()
+                case .SignIn: SignInView()
+                case .Profile(let callback): ProfileView(onSignOut: callback) // Pass callback closure
                 }
             }
         }

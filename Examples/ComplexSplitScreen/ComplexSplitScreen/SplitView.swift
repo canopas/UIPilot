@@ -28,8 +28,8 @@ struct SplitView: View {
         VStack {
             UIPilotHost(fbPilot)  { route in
                 switch route {
-                case .Home: return AnyView(FBHome())
-                case .Detail: return AnyView(FBDetail())
+                case .Home: FBHome()
+                case .Detail: FBDetail()
                 }
             }
 
@@ -40,8 +40,8 @@ struct SplitView: View {
             // We can add more than 1 route in single app to create split screen
             UIPilotHost(twitterPilot)  { route in
                 switch route {
-                case .Home: return AnyView(TwitterHome())
-                case .Detail: return AnyView(TwitterDetail())
+                case .Home: TwitterHome()
+                case .Detail: TwitterDetail()
                 }
             }
         }
