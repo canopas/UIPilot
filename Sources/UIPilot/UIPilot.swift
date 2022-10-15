@@ -1,44 +1,53 @@
 import SwiftUI
 import Combine
 
-public class UIPilot<T: Equatable>: ObservableObject {
+public class UIPilot<T: Hashable>: ObservableObject {
 
     private let logger: Logger
+        
+    private var _routes: [T] = []
     
-    @Published var paths: [UIPilotPath<T>] = []
-
-    public var stack: [T] {
-        return paths.map { $0.route }
+    var routes: [T] {
+        return _routes
     }
+    
+    var onPush: ((T) -> Void)?
+    var onPopLast: ((Int, Bool) -> Void)?
 
-    public init(initial: T, debug: Bool = false) {
+
+    public init(initial: T? = nil, debug: Bool = false) {
         logger = debug ? DebugLog() : EmptyLog()
         logger.log("UIPilot - Pilot Initialized.")
 
-        push(initial)
+        
+        if let initial = initial {
+            push(initial)
+        }
     }
 
     public func push(_ route: T) {
         logger.log("UIPilot - Pushing \(route) route.")
-        self.paths.append(UIPilotPath(route: route))
+        self._routes.append(route)
+        self.onPush?(route)
     }
 
-    public func pop() {
-        if !self.paths.isEmpty {
-            logger.log("UIPilot - Route popped.")
-            self.paths.removeLast()
+    public func pop(animated: Bool = true) {
+        if !self._routes.isEmpty {
+            let popped = self._routes.removeLast()
+            logger.log("UIPilot - \(popped) route popped.")
+            onPopLast?(1, animated)
         }
     }
 
-    public func popTo(_ route: T, inclusive: Bool = false) {
+    public func popTo(_ route: T, inclusive: Bool = false, animated: Bool = true) {
         logger.log("UIPilot: Popping route \(route).")
 
-        if paths.isEmpty {
+        if _routes.isEmpty {
             logger.log("UIPilot - Path is empty.")
             return
         }
 
-        guard var found = paths.firstIndex(where: { $0.route == route }) else {
+        guard var found = _routes.lastIndex(where: { $0 == route }) else {
             logger.log("UIPilot - Route not found.")
             return
         }
@@ -47,146 +56,87 @@ public class UIPilot<T: Equatable>: ObservableObject {
             found += 1
         }
 
-        let numToPop = (found..<paths.endIndex).count
+        let numToPop = (found..<_routes.endIndex).count
         logger.log("UIPilot - Popping \(numToPop) routes")
-        paths.removeLast(numToPop)
+        _routes.removeLast(numToPop)
+        onPopLast?(numToPop, animated)
     }
     
-    func systemPop(path: UIPilotPath<T>) {
-        if paths.count > 1
-            && path.id == self.paths[self.paths.count - 2].id {
-                self.pop()
+    public func onSystemPop() {
+        if !self._routes.isEmpty {
+            let popped = self._routes.removeLast()
+            logger.log("UIPilot - \(popped) route popped by system")
         }
     }
 
 }
 
-struct UIPilotPath<T: Equatable>: Equatable, Hashable {
-    let route: T
-    let id: String = UUID().uuidString
-
-    static func == (lhs: UIPilotPath, rhs: UIPilotPath) -> Bool {
-        return lhs.route == rhs.route && lhs.id == rhs.id
-    }
-
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-}
-
-struct PathView<Screen: View>: View {
-    private let content: Screen
-    @ObservedObject var state: PathViewState<Screen>
-
-    public init(_ content: Screen, state: PathViewState<Screen>) {
-        self.content = content
-        self.state = state
-    }
-
-    var body: some View {
-        VStack {
-            NavigationLink(destination: self.state.next, isActive: self.$state.isActive) {
-                EmptyView()
-            }
-#if os(iOS)
-            .isDetailLink(false)
-#endif
-            content
-        }
-    }
-}
-
-class PathViewState<Screen: View>: ObservableObject {
-    @Published
-    var isActive: Bool = false {
-        didSet {
-            if !isActive && next != nil {
-                onPop()
-            }
-        }
-    }
-
-    @Published
-    var next: PathView<Screen>? {
-        didSet {
-            isActive = next != nil
-        }
-    }
-
-    var onPop: () -> Void
-
-    init(next: PathView<Screen>? = nil, onPop: @escaping () -> Void = {}) {
-        self.next = next
-        self.onPop = onPop
-    }
-}
-
-public struct UIPilotHost<T: Equatable, Screen: View>: View {
+public struct UIPilotHost<T: Hashable, Screen: View>: View {
 
     @ObservedObject
-    private var pilot: UIPilot<T>
+    var pilot: UIPilot<T>
     @ViewBuilder
-    private let routeMap: (T) -> Screen
+    var routeMap: (T) -> Screen
     
-    @State
-    private var viewGenerator = ViewGenerator<T, Screen>()
-
     public init(_ pilot: UIPilot<T>, @ViewBuilder _ routeMap: @escaping (T) -> Screen) {
         self.pilot = pilot
         self.routeMap = routeMap
-        self.viewGenerator.onPop = { path in
-            pilot.systemPop(path: path)
-        }
     }
 
     public var body: some View {
-        NavigationView {
-            viewGenerator.build(pilot.paths, routeMap)
-        }
-#if !os(macOS)
-        .navigationViewStyle(.stack)
-#endif
-        .environmentObject(pilot)
+        NavigationControllerHost(uipilot: pilot, routeMap: routeMap)
+            .environmentObject(pilot)
     }
 }
 
-class ViewGenerator<T: Equatable, Screen: View>: ObservableObject {
-    var onPop: ((UIPilotPath<T>) -> Void)? = nil
-    
-    private var pathViews = [UIPilotPath<T>: Screen]()
+struct NavigationControllerHost<T: Hashable, Screen: View>: UIViewControllerRepresentable {
+    let uipilot: UIPilot<T>
+    @ViewBuilder
+    let routeMap: (T) -> Screen
 
-    func build(
-        _ paths: [UIPilotPath<T>],
-        @ViewBuilder _  routeMap: (T) -> Screen) -> PathView<Screen>? {
-            
-        recycleViews(paths)
-
-        var current: PathView<Screen>?
-        for path in paths.reversed() {
-            let view = pathViews[path] ?? routeMap(path.route)
-            pathViews[path] = view
-            
-            let content = PathView(view, state: PathViewState())
-
-            content.state.next = current
-            content.state.onPop = current == nil ? {} : { [weak self] in
-                if let self = self {
-                    self.onPop?(path)
-                }
-            }
-            current = content
+    func makeUIViewController(context: Context) -> UINavigationController {
+        let navigation = PopAwareUINavigationController()
+        navigation.popHandler = {
+            uipilot.onSystemPop()
         }
-        return current
+        
+        for path in uipilot.routes {
+            navigation.pushViewController(
+                UIHostingController(rootView: routeMap(path)), animated: false)
+        }
+        
+        uipilot.onPush = { route in
+            navigation.pushViewController(
+                UIHostingController(rootView: routeMap(route)), animated: true)
+        }
+        
+        uipilot.onPopLast = { numToPop, animated in
+            if numToPop == navigation.viewControllers.count {
+                navigation.viewControllers = []
+            } else {
+                let popTo = navigation.viewControllers[navigation.viewControllers.count - numToPop - 1]
+                navigation.popToViewController(popTo, animated: animated)
+            }
+        }
+        
+        return navigation
     }
+    
+    func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {
+        
+    }
+        
+    typealias UIViewControllerType = UINavigationController
+}
 
-    private func recycleViews(_ paths: [UIPilotPath<T>]){
-        var pathViews = self.pathViews
-        for key in pathViews.keys {
-            if !paths.contains(key) {
-                pathViews.removeValue(forKey: key)
-            }
-        }
-        self.pathViews = pathViews
+class PopAwareUINavigationController: UINavigationController
+{
+    var popHandler: (() -> Void)?
+
+    override func popViewController(animated: Bool) -> UIViewController?
+    {
+        popHandler?()
+        return super.popViewController(animated: animated)
     }
 }
 
