@@ -1,7 +1,7 @@
 import SwiftUI
 import Combine
 
-public class UIPilot<T: Hashable>: ObservableObject {
+public class UIPilot<T: Equatable>: ObservableObject {
 
     private let logger: Logger
         
@@ -71,7 +71,7 @@ public class UIPilot<T: Hashable>: ObservableObject {
 
 }
 
-public struct UIPilotHost<T: Hashable, Screen: View>: View {
+public struct UIPilotHost<T: Equatable, Screen: View>: View {
 
     @ObservedObject
     var pilot: UIPilot<T>
@@ -89,7 +89,7 @@ public struct UIPilotHost<T: Hashable, Screen: View>: View {
     }
 }
 
-struct NavigationControllerHost<T: Hashable, Screen: View>: UIViewControllerRepresentable {
+struct NavigationControllerHost<T: Equatable, Screen: View>: UIViewControllerRepresentable {
     let uipilot: UIPilot<T>
     @ViewBuilder
     let routeMap: (T) -> Screen
