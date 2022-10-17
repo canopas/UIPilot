@@ -7,7 +7,7 @@ public class UIPilot<T: Equatable>: ObservableObject {
         
     private var _routes: [T] = []
     
-    var routes: [T] {
+    public var routes: [T] {
         return _routes
     }
     
