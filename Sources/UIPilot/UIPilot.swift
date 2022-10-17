@@ -14,7 +14,6 @@ public class UIPilot<T: Equatable>: ObservableObject {
     var onPush: ((T) -> Void)?
     var onPopLast: ((Int, Bool) -> Void)?
 
-
     public init(initial: T? = nil, debug: Bool = false) {
         logger = debug ? DebugLog() : EmptyLog()
         logger.log("UIPilot - Pilot Initialized.")
@@ -68,15 +67,16 @@ public class UIPilot<T: Equatable>: ObservableObject {
             logger.log("UIPilot - \(popped) route popped by system")
         }
     }
-
 }
 
 public struct UIPilotHost<T: Equatable, Screen: View>: View {
-
-    @ObservedObject
-    var pilot: UIPilot<T>
+            
+    @StateObject
+    var navigationStyle = NavigationStyle()
+        
+    let pilot: UIPilot<T>
     @ViewBuilder
-    var routeMap: (T) -> Screen
+    let routeMap: (T) -> Screen
     
     public init(_ pilot: UIPilot<T>, @ViewBuilder _ routeMap: @escaping (T) -> Screen) {
         self.pilot = pilot
@@ -84,30 +84,45 @@ public struct UIPilotHost<T: Equatable, Screen: View>: View {
     }
 
     public var body: some View {
-        NavigationControllerHost(uipilot: pilot, routeMap: routeMap)
-            .environmentObject(pilot)
+        NavigationControllerHost(
+            navTitle: navigationStyle.title,
+            navHidden: navigationStyle.isHidden,
+            uipilot: pilot,
+            routeMap: routeMap
+        )
+        .environmentObject(pilot)
+        .environment(\.uipNavigationStyle, navigationStyle)
+
     }
 }
 
 struct NavigationControllerHost<T: Equatable, Screen: View>: UIViewControllerRepresentable {
+    
+    let navTitle: String
+    let navHidden: Bool
+
     let uipilot: UIPilot<T>
+    
     @ViewBuilder
-    let routeMap: (T) -> Screen
+    var routeMap: (T) -> Screen
 
     func makeUIViewController(context: Context) -> UINavigationController {
         let navigation = PopAwareUINavigationController()
+        
         navigation.popHandler = {
             uipilot.onSystemPop()
         }
         
         for path in uipilot.routes {
             navigation.pushViewController(
-                UIHostingController(rootView: routeMap(path)), animated: false)
+                UIHostingController(rootView: routeMap(path)), animated: true
+            )
         }
         
         uipilot.onPush = { route in
             navigation.pushViewController(
-                UIHostingController(rootView: routeMap(route)), animated: true)
+                UIHostingController(rootView: routeMap(route)), animated: true
+            )
         }
         
         uipilot.onPopLast = { numToPop, animated in
@@ -118,25 +133,172 @@ struct NavigationControllerHost<T: Equatable, Screen: View>: UIViewControllerRep
                 navigation.popToViewController(popTo, animated: animated)
             }
         }
-        
+                        
         return navigation
     }
     
-    func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {
-        
+    func updateUIViewController(_ navigation: UINavigationController, context: Context) {
+        navigation.topViewController?.navigationItem.title = navTitle
+        navigation.navigationBar.isHidden = navHidden
+    }
+    
+    static func dismantleUIViewController(_ navigation: UINavigationController, coordinator: ()) {
+        navigation.viewControllers = []
+        (navigation as! PopAwareUINavigationController).popHandler = nil
     }
         
     typealias UIViewControllerType = UINavigationController
 }
 
-class PopAwareUINavigationController: UINavigationController
+class PopAwareUINavigationController: UINavigationController, UINavigationControllerDelegate
 {
     var popHandler: (() -> Void)?
+    
+    var popGestureBeganController: UIViewController?
 
-    override func popViewController(animated: Bool) -> UIViewController?
-    {
-        popHandler?()
-        return super.popViewController(animated: animated)
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.delegate = self
+    }
+    
+    func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
+
+        if let coordinator = viewController.transitionCoordinator {
+            coordinator.notifyWhenInteractionChanges { [weak self] (context) in
+                if !context.isCancelled {
+                    self?.popHandler?()
+                }
+            }
+        }
+    }
+}
+
+
+extension View {
+    public func uipNavigationBarHidden(_ hidden: Bool) -> some View {
+        return modifier(NavHiddenModifier(isHidden: hidden))
+    }
+    
+    public func uipNavigationTitle(_ title: String) -> some View {
+        return modifier(NavTitleModifier(title: title))
+    }
+
+}
+
+private struct NavigationTitleKey: EnvironmentKey {
+    static let defaultValue: Binding<String> = .constant("")
+}
+
+private struct NavigationHiddenKey: EnvironmentKey {
+    static let defaultValue: Binding<Bool> = .constant(false)
+}
+
+private struct NavigationStyleKey: EnvironmentKey {
+    static let defaultValue: NavigationStyle = NavigationStyle()
+}
+
+
+extension EnvironmentValues {
+    
+    var uipNavigationStyle: NavigationStyle {
+        get { self[NavigationStyleKey.self] }
+        set {
+            self[NavigationStyleKey.self] = newValue
+        }
+    }
+
+    var upNavigationHidden: Binding<Bool> {
+        get { self[NavigationHiddenKey.self] }
+        set {
+            self[NavigationHiddenKey.self] = newValue
+        }
+    }
+    
+    var upNavigationTitle: Binding<String> {
+        get { self[NavigationTitleKey.self] }
+        set {
+            self[NavigationTitleKey.self] = newValue
+        }
+    }
+}
+
+class NavigationStyle: ObservableObject {
+    @Published
+    var isHidden = false
+    var isHiddenOwner: String = ""
+
+    @Published
+    var title = ""
+    var titleOwner: String = ""
+}
+
+struct NavTitleModifier: ViewModifier {
+    let title: String
+    
+    @State var id = UUID().uuidString
+    @State var initialValue: String = ""
+    
+    @Environment(\.uipNavigationStyle) var navStyle
+    
+    init(title: String) {
+        self.title = title
+    }
+
+    func body(content: Content) -> some View {
+        
+        // In case where title change after onAppear
+        if navStyle.titleOwner == id && navStyle.title != title {
+            DispatchQueue.main.async {
+                navStyle.title = title
+            }
+        }
+
+        return content
+            .onAppear {
+                initialValue = navStyle.title
+                
+                navStyle.title = title
+                navStyle.titleOwner = id
+            }
+            .onDisappear {
+                if navStyle.titleOwner == id {
+                    navStyle.title = initialValue
+                    navStyle.titleOwner = ""
+                }
+            }
+    }
+}
+
+struct NavHiddenModifier: ViewModifier {
+    let isHidden: Bool
+    
+    @State var id = UUID().uuidString
+    @State var initialValue: Bool = false
+
+    @Environment(\.uipNavigationStyle) var navStyle
+    
+    func body(content: Content) -> some View {
+        
+        // In case where isHidden change after onAppear
+        if navStyle.isHiddenOwner == id && navStyle.isHidden != isHidden {
+            DispatchQueue.main.async {
+                navStyle.isHidden = isHidden
+            }
+        }
+
+        return content
+            .onAppear {
+                initialValue = navStyle.isHidden
+                
+                navStyle.isHidden = isHidden
+                navStyle.isHiddenOwner = id
+            }
+            .onDisappear {
+                if navStyle.isHiddenOwner == id {
+                    navStyle.isHidden = initialValue
+                    navStyle.isHiddenOwner = ""
+                }
+            }
     }
 }
 
