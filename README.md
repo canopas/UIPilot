@@ -32,7 +32,7 @@ Please have a look at the [article](https://blog.canopas.com/swiftui-complex-nav
 
 Version 1.x - Uses SwiftUI `NavigationView` underneath.
 
-Version 2.x - Uses UIKit `UINavigationController` underneath (Recommended).
+Version 2.x - Uses UIKit `UINavigationController` underneath (recommended).
 
 ### Swift Package Manager
 
