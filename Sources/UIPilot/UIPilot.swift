@@ -161,13 +161,11 @@ class PopAwareUINavigationController: UINavigationController, UINavigationContro
         self.delegate = self
     }
     
-    func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
-
+    func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
         if let coordinator = viewController.transitionCoordinator {
-            coordinator.notifyWhenInteractionChanges { [weak self] (context) in
-                if !context.isCancelled {
-                    self?.popHandler?()
-                }
+            if let dismissedViewController = coordinator.viewController(forKey: .from),
+                      !navigationController.viewControllers.contains(dismissedViewController) {
+                self.popHandler?()
             }
         }
     }
