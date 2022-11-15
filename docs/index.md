@@ -309,6 +309,11 @@ Please have a look at the [article](https://blog.canopas.com/swiftui-complex-nav
 
 ## Installation
 
+Version 1.x - Uses SwiftUI NavigationView underneath.
+
+Version 2.x - Uses UIKit UINavigationController underneath (recommended).
+
+
 ### Swift Package Manager
 
 The [Swift Package Manager](https://swift.org/package-manager/) is a tool for automating the distribution of Swift code and is integrated into the `swift` compiler. 
