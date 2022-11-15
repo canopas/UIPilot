@@ -30,6 +30,10 @@ Please have a look at the [article](https://blog.canopas.com/swiftui-complex-nav
 
 ## Installation
 
+Version 1.x - Uses SwiftUI `NavigationView` underneath.
+
+Version 2.x - Uses UIKit `UINavigationController` underneath (recommended).
+
 ### Swift Package Manager
 
 The [Swift Package Manager](https://swift.org/package-manager/) is a tool for automating the distribution of Swift code and is integrated into the `swift` compiler. 
@@ -38,7 +42,7 @@ Once you have your Swift package set up, adding UIPilot as a dependency is as ea
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/canopas/UIPilot.git", .upToNextMajor(from: "1.3.1"))
+    .package(url: "https://github.com/canopas/UIPilot.git", .upToNextMajor(from: "2.0.0"))
 ]
 ```
 
@@ -47,7 +51,7 @@ dependencies: [
 [CocoaPods][] is a dependency manager for Cocoa projects. For usage and installation instructions, visit their website. To integrate UIPilot into your Xcode project using CocoaPods, specify it in your Podfile:
 
     target 'YourAppName' do
-        pod 'UIPilot', '~> 1.3.1'
+        pod 'UIPilot', '~> 2.0.0'
     end
 
 [CocoaPods]: https://cocoapods.org

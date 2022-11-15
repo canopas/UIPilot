@@ -4,41 +4,49 @@ import Combine
 public class UIPilot<T: Equatable>: ObservableObject {
 
     private let logger: Logger
+        
+    private var _routes: [T] = []
     
-    @Published var paths: [UIPilotPath<T>] = []
-
-    public var stack: [T] {
-        return paths.map { $0.route }
+    public var routes: [T] {
+        return _routes
     }
+    
+    var onPush: ((T) -> Void)?
+    var onPopLast: ((Int, Bool) -> Void)?
 
-    public init(initial: T, debug: Bool = false) {
+    public init(initial: T? = nil, debug: Bool = false) {
         logger = debug ? DebugLog() : EmptyLog()
         logger.log("UIPilot - Pilot Initialized.")
 
-        push(initial)
+        
+        if let initial = initial {
+            push(initial)
+        }
     }
 
     public func push(_ route: T) {
         logger.log("UIPilot - Pushing \(route) route.")
-        self.paths.append(UIPilotPath(route: route))
+        self._routes.append(route)
+        self.onPush?(route)
     }
 
-    public func pop() {
-        if !self.paths.isEmpty {
-            logger.log("UIPilot - Route popped.")
-            self.paths.removeLast()
+    public func pop(animated: Bool = true) {
+        if !self._routes.isEmpty {
+            let popped = self._routes.removeLast()
+            logger.log("UIPilot - \(popped) route popped.")
+            onPopLast?(1, animated)
         }
     }
 
-    public func popTo(_ route: T, inclusive: Bool = false) {
+    public func popTo(_ route: T, inclusive: Bool = false, animated: Bool = true) {
         logger.log("UIPilot: Popping route \(route).")
 
-        if paths.isEmpty {
+        if _routes.isEmpty {
             logger.log("UIPilot - Path is empty.")
             return
         }
 
-        guard var found = paths.firstIndex(where: { $0.route == route }) else {
+        guard var found = _routes.lastIndex(where: { $0 == route }) else {
             logger.log("UIPilot - Route not found.")
             return
         }
@@ -47,146 +55,248 @@ public class UIPilot<T: Equatable>: ObservableObject {
             found += 1
         }
 
-        let numToPop = (found..<paths.endIndex).count
+        let numToPop = (found..<_routes.endIndex).count
         logger.log("UIPilot - Popping \(numToPop) routes")
-        paths.removeLast(numToPop)
+        _routes.removeLast(numToPop)
+        onPopLast?(numToPop, animated)
     }
     
-    func systemPop(path: UIPilotPath<T>) {
-        if paths.count > 1
-            && path.id == self.paths[self.paths.count - 2].id {
-                self.pop()
+    public func onSystemPop() {
+        if !self._routes.isEmpty {
+            let popped = self._routes.removeLast()
+            logger.log("UIPilot - \(popped) route popped by system")
         }
-    }
-
-}
-
-struct UIPilotPath<T: Equatable>: Equatable, Hashable {
-    let route: T
-    let id: String = UUID().uuidString
-
-    static func == (lhs: UIPilotPath, rhs: UIPilotPath) -> Bool {
-        return lhs.route == rhs.route && lhs.id == rhs.id
-    }
-
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-}
-
-struct PathView<Screen: View>: View {
-    private let content: Screen
-    @ObservedObject var state: PathViewState<Screen>
-
-    public init(_ content: Screen, state: PathViewState<Screen>) {
-        self.content = content
-        self.state = state
-    }
-
-    var body: some View {
-        VStack {
-            NavigationLink(destination: self.state.next, isActive: self.$state.isActive) {
-                EmptyView()
-            }
-#if os(iOS)
-            .isDetailLink(false)
-#endif
-            content
-        }
-    }
-}
-
-class PathViewState<Screen: View>: ObservableObject {
-    @Published
-    var isActive: Bool = false {
-        didSet {
-            if !isActive && next != nil {
-                onPop()
-            }
-        }
-    }
-
-    @Published
-    var next: PathView<Screen>? {
-        didSet {
-            isActive = next != nil
-        }
-    }
-
-    var onPop: () -> Void
-
-    init(next: PathView<Screen>? = nil, onPop: @escaping () -> Void = {}) {
-        self.next = next
-        self.onPop = onPop
     }
 }
 
 public struct UIPilotHost<T: Equatable, Screen: View>: View {
-
-    @ObservedObject
-    private var pilot: UIPilot<T>
+            
+    @StateObject
+    var navigationStyle = NavigationStyle()
+        
+    let pilot: UIPilot<T>
     @ViewBuilder
-    private let routeMap: (T) -> Screen
+    let routeMap: (T) -> Screen
     
-    @State
-    private var viewGenerator = ViewGenerator<T, Screen>()
-
     public init(_ pilot: UIPilot<T>, @ViewBuilder _ routeMap: @escaping (T) -> Screen) {
         self.pilot = pilot
         self.routeMap = routeMap
-        self.viewGenerator.onPop = { path in
-            pilot.systemPop(path: path)
-        }
     }
 
     public var body: some View {
-        NavigationView {
-            viewGenerator.build(pilot.paths, routeMap)
-        }
-#if !os(macOS)
-        .navigationViewStyle(.stack)
-#endif
+        NavigationControllerHost(
+            navTitle: navigationStyle.title,
+            navHidden: navigationStyle.isHidden,
+            uipilot: pilot,
+            routeMap: routeMap
+        )
         .environmentObject(pilot)
+        .environment(\.uipNavigationStyle, navigationStyle)
+
     }
 }
 
-class ViewGenerator<T: Equatable, Screen: View>: ObservableObject {
-    var onPop: ((UIPilotPath<T>) -> Void)? = nil
+struct NavigationControllerHost<T: Equatable, Screen: View>: UIViewControllerRepresentable {
     
-    private var pathViews = [UIPilotPath<T>: Screen]()
+    let navTitle: String
+    let navHidden: Bool
 
-    func build(
-        _ paths: [UIPilotPath<T>],
-        @ViewBuilder _  routeMap: (T) -> Screen) -> PathView<Screen>? {
-            
-        recycleViews(paths)
+    let uipilot: UIPilot<T>
+    
+    @ViewBuilder
+    var routeMap: (T) -> Screen
 
-        var current: PathView<Screen>?
-        for path in paths.reversed() {
-            let view = pathViews[path] ?? routeMap(path.route)
-            pathViews[path] = view
-            
-            let content = PathView(view, state: PathViewState())
-
-            content.state.next = current
-            content.state.onPop = current == nil ? {} : { [weak self] in
-                if let self = self {
-                    self.onPop?(path)
-                }
-            }
-            current = content
+    func makeUIViewController(context: Context) -> UINavigationController {
+        let navigation = PopAwareUINavigationController()
+        
+        navigation.popHandler = {
+            uipilot.onSystemPop()
         }
-        return current
+        
+        for path in uipilot.routes {
+            navigation.pushViewController(
+                UIHostingController(rootView: routeMap(path)), animated: true
+            )
+        }
+        
+        uipilot.onPush = { route in
+            navigation.pushViewController(
+                UIHostingController(rootView: routeMap(route)), animated: true
+            )
+        }
+        
+        uipilot.onPopLast = { numToPop, animated in
+            if numToPop == navigation.viewControllers.count {
+                navigation.viewControllers = []
+            } else {
+                let popTo = navigation.viewControllers[navigation.viewControllers.count - numToPop - 1]
+                navigation.popToViewController(popTo, animated: animated)
+            }
+        }
+                        
+        return navigation
+    }
+    
+    func updateUIViewController(_ navigation: UINavigationController, context: Context) {
+        navigation.topViewController?.navigationItem.title = navTitle
+        navigation.navigationBar.isHidden = navHidden
+    }
+    
+    static func dismantleUIViewController(_ navigation: UINavigationController, coordinator: ()) {
+        navigation.viewControllers = []
+        (navigation as! PopAwareUINavigationController).popHandler = nil
+    }
+        
+    typealias UIViewControllerType = UINavigationController
+}
+
+class PopAwareUINavigationController: UINavigationController, UINavigationControllerDelegate
+{
+    var popHandler: (() -> Void)?
+    
+    var popGestureBeganController: UIViewController?
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.delegate = self
+    }
+    
+    func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
+        if let coordinator = viewController.transitionCoordinator {
+            if let dismissedViewController = coordinator.viewController(forKey: .from),
+                      !navigationController.viewControllers.contains(dismissedViewController) {
+                self.popHandler?()
+            }
+        }
+    }
+}
+
+
+extension View {
+    public func uipNavigationBarHidden(_ hidden: Bool) -> some View {
+        return modifier(NavHiddenModifier(isHidden: hidden))
+    }
+    
+    public func uipNavigationTitle(_ title: String) -> some View {
+        return modifier(NavTitleModifier(title: title))
     }
 
-    private func recycleViews(_ paths: [UIPilotPath<T>]){
-        var pathViews = self.pathViews
-        for key in pathViews.keys {
-            if !paths.contains(key) {
-                pathViews.removeValue(forKey: key)
+}
+
+private struct NavigationTitleKey: EnvironmentKey {
+    static let defaultValue: Binding<String> = .constant("")
+}
+
+private struct NavigationHiddenKey: EnvironmentKey {
+    static let defaultValue: Binding<Bool> = .constant(false)
+}
+
+private struct NavigationStyleKey: EnvironmentKey {
+    static let defaultValue: NavigationStyle = NavigationStyle()
+}
+
+
+extension EnvironmentValues {
+    
+    var uipNavigationStyle: NavigationStyle {
+        get { self[NavigationStyleKey.self] }
+        set {
+            self[NavigationStyleKey.self] = newValue
+        }
+    }
+
+    var upNavigationHidden: Binding<Bool> {
+        get { self[NavigationHiddenKey.self] }
+        set {
+            self[NavigationHiddenKey.self] = newValue
+        }
+    }
+    
+    var upNavigationTitle: Binding<String> {
+        get { self[NavigationTitleKey.self] }
+        set {
+            self[NavigationTitleKey.self] = newValue
+        }
+    }
+}
+
+class NavigationStyle: ObservableObject {
+    @Published
+    var isHidden = false
+    var isHiddenOwner: String = ""
+
+    @Published
+    var title = ""
+    var titleOwner: String = ""
+}
+
+struct NavTitleModifier: ViewModifier {
+    let title: String
+    
+    @State var id = UUID().uuidString
+    @State var initialValue: String = ""
+    
+    @Environment(\.uipNavigationStyle) var navStyle
+    
+    init(title: String) {
+        self.title = title
+    }
+
+    func body(content: Content) -> some View {
+        
+        // In case where title change after onAppear
+        if navStyle.titleOwner == id && navStyle.title != title {
+            DispatchQueue.main.async {
+                navStyle.title = title
             }
         }
-        self.pathViews = pathViews
+
+        return content
+            .onAppear {
+                initialValue = navStyle.title
+                
+                navStyle.title = title
+                navStyle.titleOwner = id
+            }
+            .onDisappear {
+                if navStyle.titleOwner == id {
+                    navStyle.title = initialValue
+                    navStyle.titleOwner = ""
+                }
+            }
+    }
+}
+
+struct NavHiddenModifier: ViewModifier {
+    let isHidden: Bool
+    
+    @State var id = UUID().uuidString
+    @State var initialValue: Bool = false
+
+    @Environment(\.uipNavigationStyle) var navStyle
+    
+    func body(content: Content) -> some View {
+        
+        // In case where isHidden change after onAppear
+        if navStyle.isHiddenOwner == id && navStyle.isHidden != isHidden {
+            DispatchQueue.main.async {
+                navStyle.isHidden = isHidden
+            }
+        }
+
+        return content
+            .onAppear {
+                initialValue = navStyle.isHidden
+                
+                navStyle.isHidden = isHidden
+                navStyle.isHiddenOwner = id
+            }
+            .onDisappear {
+                if navStyle.isHiddenOwner == id {
+                    navStyle.isHidden = initialValue
+                    navStyle.isHiddenOwner = ""
+                }
+            }
     }
 }
 
