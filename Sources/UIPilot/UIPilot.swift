@@ -14,7 +14,9 @@ public class UIPilot<T: Equatable>: ObservableObject {
     
     var onPush: ((T) -> Void)?
     var onPopLast: ((Int, Bool) -> Void)?
-
+    
+    private var shouldIgnoreSystemPop: Bool = false
+    
     public init(initial: T? = nil, debug: Bool = false) {
         logger = debug ? DebugLog() : EmptyLog()
         logger.log("UIPilot - Pilot Initialized.")
@@ -35,6 +37,7 @@ public class UIPilot<T: Equatable>: ObservableObject {
         if !self._routes.isEmpty {
             let popped = self._routes.removeLast()
             logger.log("UIPilot - \(popped) route popped.")
+            shouldIgnoreSystemPop = true
             onPopLast?(1, animated)
         }
     }
@@ -59,14 +62,17 @@ public class UIPilot<T: Equatable>: ObservableObject {
         let numToPop = (found..<_routes.endIndex).count
         logger.log("UIPilot - Popping \(numToPop) routes")
         _routes.removeLast(numToPop)
+        shouldIgnoreSystemPop = true
         onPopLast?(numToPop, animated)
     }
     
     public func onSystemPop() {
-        if !self._routes.isEmpty {
-            let popped = self._routes.removeLast()
-            logger.log("UIPilot - \(popped) route popped by system")
+        guard !shouldIgnoreSystemPop, !self._routes.isEmpty else {
+            shouldIgnoreSystemPop = false
+            return
         }
+        let popped = self._routes.removeLast()
+        logger.log("UIPilot - \(popped) route popped by system")
     }
 }
 
