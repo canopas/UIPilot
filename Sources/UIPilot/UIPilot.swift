@@ -67,12 +67,14 @@ public class UIPilot<T: Equatable>: ObservableObject {
     }
     
     public func onSystemPop() {
-        guard !shouldIgnoreSystemPop, !self._routes.isEmpty else {
+        guard !shouldIgnoreSystemPop else {
             shouldIgnoreSystemPop = false
             return
         }
-        let popped = self._routes.removeLast()
-        logger.log("UIPilot - \(popped) route popped by system")
+        if !self._routes.isEmpty {
+            let popped = self._routes.removeLast()
+            logger.log("UIPilot - \(popped) route popped by system")
+        }
     }
 }
 
