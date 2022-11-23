@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "UIPilot"
-  s.version          = "2.0.1"
+  s.version          = "2.0.2"
   s.summary          = "The missing type-safe, SwiftUI navigation library."
 
   s.description      = <<-DESC
@@ -21,7 +21,4 @@ Pod::Spec.new do |s|
   s.preserve_paths   = 'README.md'
 
   s.ios.deployment_target     = '14.0'
-  s.tvos.deployment_target    = '14.0'
-  s.osx.deployment_target     = '11.0'
-  s.watchos.deployment_target = '7.0'
 end

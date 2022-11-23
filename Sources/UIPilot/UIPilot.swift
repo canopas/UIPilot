@@ -113,6 +113,9 @@ struct NavigationControllerHost<T: Equatable, Screen: View>: UIViewControllerRep
         navigation.popHandler = {
             uipilot.onSystemPop()
         }
+        navigation.stackSizeProvider = {
+            uipilot.routes.count
+        }
         
         for path in uipilot.routes {
             navigation.pushViewController(
@@ -154,6 +157,7 @@ struct NavigationControllerHost<T: Equatable, Screen: View>: UIViewControllerRep
 class PopAwareUINavigationController: UINavigationController, UINavigationControllerDelegate
 {
     var popHandler: (() -> Void)?
+    var stackSizeProvider: (() -> Int)?
     
     var popGestureBeganController: UIViewController?
 
@@ -163,15 +167,12 @@ class PopAwareUINavigationController: UINavigationController, UINavigationContro
     }
     
     func navigationController(_ navigationController: UINavigationController, didShow viewController: UIViewController, animated: Bool) {
-        if let coordinator = viewController.transitionCoordinator {
-            if let dismissedViewController = coordinator.viewController(forKey: .from),
-                      !navigationController.viewControllers.contains(dismissedViewController) {
-                self.popHandler?()
-            }
+        
+        if let stackSizeProvider = stackSizeProvider, stackSizeProvider() > navigationController.viewControllers.count {
+            self.popHandler?()
         }
     }
 }
-
 
 extension View {
     public func uipNavigationBarHidden(_ hidden: Bool) -> some View {
