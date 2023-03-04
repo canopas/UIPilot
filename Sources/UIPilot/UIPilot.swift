@@ -64,8 +64,11 @@ public class UIPilot<T: Equatable>: ObservableObject {
     
     public func onSystemPop() {
         if !self._routes.isEmpty {
-            let popped = self._routes.removeLast()
-            logger.log("UIPilot - \(popped) route popped by system")
+            if let popped = _routes.removeLast() as? StateBack {
+                popped.goBack()
+            } else {
+                logger.log("UIPilot - route popped by system")
+            }
         }
     }
 }
@@ -304,4 +307,8 @@ struct NavHiddenModifier: ViewModifier {
 
 protocol Logger {
     func log(_ value: String)
+}
+
+protocol StateBack {
+    func goBack()
 }
