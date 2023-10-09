@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2AB9C3F42AD420A10025A6A6 /* UIPilot in Frameworks */ = {isa = PBXBuildFile; productRef = 2AB9C3F32AD420A10025A6A6 /* UIPilot */; };
 		5F8ED75B27DC946100CF3062 /* ComplexSplitScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F8ED75A27DC946100CF3062 /* ComplexSplitScreen.swift */; };
 		5F8ED75D27DC946100CF3062 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F8ED75C27DC946100CF3062 /* HomeView.swift */; };
 		5F8ED75F27DC946300CF3062 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5F8ED75E27DC946300CF3062 /* Assets.xcassets */; };
-		5F8ED76A27DC951200CF3062 /* UIPilot in Frameworks */ = {isa = PBXBuildFile; productRef = 5F8ED76927DC951200CF3062 /* UIPilot */; };
 		5F8ED76C27DC963900CF3062 /* SplitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F8ED76B27DC963900CF3062 /* SplitView.swift */; };
 		5F8ED76E27DC969200CF3062 /* FBHome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F8ED76D27DC969200CF3062 /* FBHome.swift */; };
 		5F8ED77427DC99A800CF3062 /* TwitterHome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F8ED77327DC99A800CF3062 /* TwitterHome.swift */; };
@@ -31,7 +31,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5F8ED76A27DC951200CF3062 /* UIPilot in Frameworks */,
+				2AB9C3F42AD420A10025A6A6 /* UIPilot in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -84,7 +84,7 @@
 			);
 			name = ComplexSplitScreen;
 			packageProductDependencies = (
-				5F8ED76927DC951200CF3062 /* UIPilot */,
+				2AB9C3F32AD420A10025A6A6 /* UIPilot */,
 			);
 			productName = ComplexSplitScreen;
 			productReference = 5F8ED75727DC946100CF3062 /* ComplexSplitScreen.app */;
@@ -115,7 +115,7 @@
 			);
 			mainGroup = 5F8ED74E27DC946100CF3062;
 			packageReferences = (
-				5F8ED76827DC951200CF3062 /* XCRemoteSwiftPackageReference "UIPilot" */,
+				2AB9C3F22AD420A10025A6A6 /* XCRemoteSwiftPackageReference "UIPilot" */,
 			);
 			productRefGroup = 5F8ED75827DC946100CF3062 /* Products */;
 			projectDirPath = "";
@@ -351,20 +351,20 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		5F8ED76827DC951200CF3062 /* XCRemoteSwiftPackageReference "UIPilot" */ = {
+		2AB9C3F22AD420A10025A6A6 /* XCRemoteSwiftPackageReference "UIPilot" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/canopas/UIPilot.git";
+			repositoryURL = "https://github.com/canopas/UIPilot";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.1.5;
+				branch = "navigation-stack-ios-16";
+				kind = branch;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		5F8ED76927DC951200CF3062 /* UIPilot */ = {
+		2AB9C3F32AD420A10025A6A6 /* UIPilot */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 5F8ED76827DC951200CF3062 /* XCRemoteSwiftPackageReference "UIPilot" */;
+			package = 2AB9C3F22AD420A10025A6A6 /* XCRemoteSwiftPackageReference "UIPilot" */;
 			productName = UIPilot;
 		};
 /* End XCSwiftPackageProductDependency section */

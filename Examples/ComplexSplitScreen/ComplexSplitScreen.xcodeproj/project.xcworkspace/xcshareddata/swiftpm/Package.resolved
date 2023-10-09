@@ -3,10 +3,10 @@
     {
       "identity" : "uipilot",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/canopas/UIPilot.git",
+      "location" : "https://github.com/canopas/UIPilot",
       "state" : {
-        "revision" : "34abdee9eb7cb41679ed0f5b052a9bdf31b10c68",
-        "version" : "1.3.0"
+        "branch" : "navigation-stack-ios-16",
+        "revision" : "a4ee53b7089a152cbfd689c3cae2027dc156fa09"
       }
     }
   ],
