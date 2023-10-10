@@ -12,3 +12,7 @@ class DebugLog: Logger {
         print(value)
     }
 }
+
+protocol Logger {
+    func log(_ value: String)
+}

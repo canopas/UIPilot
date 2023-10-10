@@ -22,13 +22,11 @@ struct ComplexSplitScreen: App {
     var body: some Scene {
         WindowGroup {
             if #available(iOS 16.0, *) {
-                NavigationStack {
-                    UIPilotHost(pilot)  { route in
-                        switch route {
-                        case .Home: HomeView()
-                        case .Split: SplitView()
-                        case .Browser(let url): WebView(url: URL(string: url)!)
-                        }
+                UIPilotHost(pilot)  { route in
+                    switch route {
+                    case .Home: HomeView()
+                    case .Split: SplitView()
+                    case .Browser(let url): WebView(url: URL(string: url)!)
                     }
                 }
             } else {

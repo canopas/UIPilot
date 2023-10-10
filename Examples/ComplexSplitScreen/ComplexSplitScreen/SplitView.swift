@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import UIPilot
+//import UIPilot
 
 enum FacebookAppRoute: Equatable {
     case Home
