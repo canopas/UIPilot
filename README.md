@@ -1,3 +1,5 @@
+<img src="https://github.com/canopas/UIPilot/blob/main/docs/assets/canopas_light_banner.png?raw=true" height="83" />
+
 # UIPilot
 
 [![Swift](https://img.shields.io/badge/Swift-5.5-orange?style=flat-square)](https://img.shields.io/badge/Swift-5.5-Orange?style=flat-square)
