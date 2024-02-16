@@ -1,4 +1,4 @@
-<img src="https://github.com/canopas/UIPilot/blob/main/docs/assets/canopas_light_banner.png?raw=true" height="83" />
+<p align="center"> <a href="https://canopas.com/contact"><img src="./docs/assets/canopas_light_banner.png"></a></p>
 
 # UIPilot
 
