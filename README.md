@@ -65,7 +65,7 @@ For bugs, questions, and discussions please use the [Github Issues](https://gith
 
 UIPilot is owned and maintained by the [Canopas](https://canopas.com/) team. You can follow them on Twitter at [@canopassoftware](https://twitter.com/canopassoftware) for project updates and releases.
 
-<a href="https://canopas.com/contact"><img src="https://github.com/canopas/UIPilot/assets/73588408/942bc15a-5ece-4453-9b3d-7a8b03ebb82d" width=350></a>
+<a href="https://canopas.com/contact"><img src="https://github.com/canopas/UIPilot/assets/73588408/6d691a53-e495-4783-b510-76ae4d692201" width=250></a>
 
 # Licence
 
