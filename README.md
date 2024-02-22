@@ -9,9 +9,9 @@
 <img src="https://github.com/canopas/UIPilot/blob/main/docs/assets/intro-image.jpg?raw=true" height="350" />
 
 ## Why another SwiftUI navigation library?
-- UIPilot is not a replacement of the SwiftUI's `NavigationView`, it's rather a wrapper around it that you would have likely written. Thus all standard `NavigationView` features like title, swipe gesture, topbar etc. are available by default.
-- APIs are inspired by the android, flutter and web based routers - Very simple and easy to use.
-- Typesafe navigation - Routing to wrong path will fail at compile time rather than runtime.
+- UIPilot is not a replacement for SwiftUI's `NavigationView`, it's rather a wrapper around it that you would have likely written. Thus all standard `NavigationView` features like title, swipe gesture, topbar, etc. are available by default.
+- APIs are inspired by the Android, flutter, and web-based routers - Very simple and easy to use.
+- Typesafe navigation - Routing to the wrong path will fail at compile time rather than runtime.
 - Typesafe parameters - Routing with wrong parameters will fail at compile time rather than runtime.
 - Very tiny library - it's barely 200 lines of code.
 
@@ -24,7 +24,7 @@ Please have a look at the [article](https://blog.canopas.com/swiftui-complex-nav
 ## Complex use cases
 The library is designed to meet simple use cases as well as complex ones. You can also have nested `UIPilot` as many as you like!
 
-For example, it's very easy to achieve split screen like behavior.
+For example, it's very easy to achieve split screen-like behavior.
 
 <img src="https://github.com/canopas/UIPilot/blob/main/docs/assets/complex-routing.gif?raw=true" height="500" />
 
@@ -59,11 +59,13 @@ dependencies: [
 [CocoaPods]: https://cocoapods.org
 
 # Bugs and Feedback
-For bugs, questions and discussions please use the [Github Issues](https://github.com/canopas/UIPilot/issues).
+For bugs, questions, and discussions please use the [Github Issues](https://github.com/canopas/UIPilot/issues).
 
 # Credits
 
 UIPilot is owned and maintained by the [Canopas](https://canopas.com/) team. You can follow them on Twitter at [@canopassoftware](https://twitter.com/canopassoftware) for project updates and releases.
+
+<a href="https://canopas.com/contact"><img src="https://github.com/canopas/UIPilot/assets/73588408/942bc15a-5ece-4453-9b3d-7a8b03ebb82d" width=350></a>
 
 # Licence
 
