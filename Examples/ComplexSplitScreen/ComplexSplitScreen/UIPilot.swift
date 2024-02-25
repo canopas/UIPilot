@@ -1,3 +1,10 @@
+//
+//  UIPilot.swift
+//  ComplexSplitScreen
+//
+//  Created by Divyesh Vekariya on 10/10/23.
+//
+
 import SwiftUI
 import Combine
 
@@ -21,12 +28,11 @@ public class UIPilot<T: Equatable>: ObservableObject {
         return paths.map { $0.route }
     }
     
-    public init(_ initial: T? = nil, debug: Bool = false) {
+    public init(initial: T, debug: Bool = false) {
         logger = debug ? DebugLog() : EmptyLog()
         logger.log("UIPilot - Pilot Initialized.")
-        if let initial = initial {
-            push(initial)
-        }
+        
+        push(initial)
     }
     
     public func push(_ route: T) {
@@ -70,6 +76,19 @@ public class UIPilot<T: Equatable>: ObservableObject {
         }
     }
     
+}
+
+struct UIPilotPath<T: Equatable>: Equatable, Hashable {
+    let route: T
+    let id: String = UUID().uuidString
+
+    static func == (lhs: UIPilotPath, rhs: UIPilotPath) -> Bool {
+        return lhs.route == rhs.route && lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
 
 struct PathView<Screen: View>: View {
@@ -209,3 +228,25 @@ class ViewGenerator<T: Equatable, Screen: View>: ObservableObject {
         self.pathViews = pathViews
     }
 }
+
+
+
+///Logger
+
+class DebugLog: Logger {
+    func log(_ value: String) {
+        print(value)
+    }
+}
+
+protocol Logger {
+    func log(_ value: String)
+}
+
+class EmptyLog: Logger {
+    func log(_ value: String) {
+        
+    }
+}
+
+

@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import UIPilot
+//import UIPilot
 import WebKit
 
 struct WebView: UIViewRepresentable {

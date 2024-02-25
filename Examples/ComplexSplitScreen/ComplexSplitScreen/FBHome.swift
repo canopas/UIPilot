@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import UIPilot
+//import UIPilot
 
 struct FBHome: View {
     @EnvironmentObject var pilot: UIPilot<FacebookAppRoute>
