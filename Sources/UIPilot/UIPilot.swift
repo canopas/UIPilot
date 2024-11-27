@@ -125,7 +125,7 @@ struct NavigationControllerHost<T: Equatable, Screen: View>: UIViewControllerRep
         
         uipilot.onPush = { route in
             navigation.pushViewController(
-                UIHostingController(rootView: routeMap(route)), animated: true
+                UIHostingController(rootView: routeMap(route)), animated: false
             )
         }
         
