@@ -10,7 +10,7 @@ If you are reporting a bug, please help speed up problem diagnosis by providing 
 
 ## Contributing code
 We actively welcome your pull requests. You can find instructions on building the project in [README.md](https://github.com/canopas/UIPilot).
-1. Fork the repo and create your branch from `master`.  
+1. Fork the repo and create your branch from `main`.  
 2. If you've added code that should be tested, add tests  
 4. Make sure your code lints.  
 
