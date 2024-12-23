@@ -58,6 +58,10 @@ dependencies: [
 
 [CocoaPods]: https://cocoapods.org
 
+## Contribution
+
+The Canopas team enthusiastically welcomes contributions and project participation! There are a bunch of things you can do if you want to contribute! The [Contributor Guide](CONTRIBUTING.md) has all the information you need for everything from reporting bugs to contributing entire new features. Please don't hesitate to jump in if you'd like to, or even ask us questions if something isn't clear.
+
 # Bugs and Feedback
 For bugs, questions, and discussions please use the [Github Issues](https://github.com/canopas/UIPilot/issues).
 
